@@ -25,7 +25,7 @@ table_body = policy_rates_df.find('tbody')
 rows = table_body.find_all('tr')
 print(rows[0])
 
-data = []
+data_temp = []
 
 for row in rows:
     cols = row.find_all('td')
@@ -33,9 +33,10 @@ for row in rows:
     if cols[0] == '':
         cols[0] = previous_value
     previous_value = cols[0]
-    data.append(cols)
+    data_temp.append(cols)
 
-print(data[0])
 columns = ['Year', 'Date', 'Deposit facility', 'Fixed rate', 'Minimum bid rate', 'Marginal lending facility']
-policy_rates_df = pd.DataFrame(data, columns=columns)
+policy_rates_df = pd.DataFrame(data_temp, columns=columns)
 print(policy_rates_df.head())
+
+policy_rates_df.to_csv('datas/' + 'policy_rates.csv', index=False)
