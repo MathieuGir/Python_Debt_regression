@@ -18,12 +18,6 @@ table_body = policy_rates_df.find('tbody')
 rows = table_body.find_all('tr')
 print(rows[0])
 
-for row in rows:
-    cols = row.find_all('td')
-    cols = [ele.text.strip() for ele in cols]
-    print(cols)
-
-
 
 for row in rows:
     cols = row.find_all('td')
@@ -32,3 +26,5 @@ for row in rows:
         cols[0] = previous_value
     previous_value = cols[0]
     print('with remplacement', cols)
+
+"test github"
