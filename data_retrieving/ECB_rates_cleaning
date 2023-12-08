@@ -4,8 +4,10 @@ import lxml
 import pandas
 import urllib
 import subprocess
+import re
 import pandas as pd
 from urllib import request
+from datetime import datetime
 
 #Installation des modules 
 modules = ["-q lxml", "webdriver-manager"]
@@ -39,4 +41,25 @@ columns = ['Year', 'Date', 'Deposit facility', 'Fixed rate', 'Minimum bid rate',
 policy_rates_df = pd.DataFrame(data_temp, columns=columns)
 print(policy_rates_df.head())
 
+
+# Using regular expressions to clean datas (footnote references or missing points at the end of the abreviation of months)
+extracted_date = policy_rates_df['Date'].str.extract(r'(\d{1,2})\s(\w{3})')
+
+month_map = {
+    'Jan': '/01', 'Feb': '/02', 'Mar': '/03',
+    'Apr': '/04', 'May': '/05', 'Jun': '/06',
+    'Jul': '/07', 'Aug': '/08', 'Sep': '/09',
+    'Oct': '/10', 'Nov': '/11', 'Dec': '/12'
+}
+
+# Constructing 'Date_new' column with the format DD/MM/YYYY
+policy_rates_df['Date'] = (
+    extracted_date[0].astype(str) +
+    extracted_date[1].map(month_map) +
+    '/' +
+    policy_rates_df['Year'].astype(str)
+)
+print(policy_rates_df)
+
+policy_rates_df.drop('Year', axis=1, inplace=True)
 policy_rates_df.to_csv('datas/' + 'policy_rates.csv', index=False)
