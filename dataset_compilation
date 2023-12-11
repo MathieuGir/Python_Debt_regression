@@ -1,7 +1,7 @@
 #Download Pypi package 
 pip install pynsee[full]
 from pynsee.utils.init_conn import init_conn
-init_conn(insee_key="gabrielorsatti", insee_secret="gabrielorsatti")
+init_conn(insee_key="gabrielorsatti", insee_secret="fR&@5F(fF)2S")
 
 from pynsee.macrodata import * 
 from pynsee.macrodata.get_series_list import get_series_list
