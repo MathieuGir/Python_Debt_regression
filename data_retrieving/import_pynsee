@@ -1,0 +1,43 @@
+#Download Pypi package 
+#pip install pynsee[full]
+#pip install matplotlib
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from pynsee.utils.init_conn import init_conn
+init_conn(insee_key='GvulBMLLd4u26RRdMPxYlvqjvHYa', insee_secret='MvDm1OBD_s1a4A33InvrYRT_wEga')
+
+from pynsee.macrodata import * 
+from pynsee.macrodata.get_series_list import get_series_list
+from pynsee.macrodata.get_series import get_series
+
+
+#downloading a dataset of general government debt 
+data_general_gov_debts = get_series('010596752')
+# Sélectionner uniquement les colonnes "Date" et "Obs_value"
+selected_columns = ['DATE', 'OBS_VALUE']
+data_general_gov_debts_filtered = data_general_gov_debts.loc[:, selected_columns]
+# Afficher les premières lignes du DataFrame filtré
+print(data_general_gov_debts_filtered.head())
+# Enregistrer le DataFrame filtré dans un fichier CSV
+data_general_gov_debts_filtered.to_csv('datas/' + 'APU_debts_filtered.csv', index=False)
+# Convertir la colonne 'Date' en format de date si elle n'est pas déjà au bon format
+data_general_gov_debts_filtered['Date'] = pd.to_datetime(data_general_gov_debts_filtered['Date'])
+# Créer le scatter plot
+plt.scatter(data_general_gov_debts_filtered['Date'], data_general_gov_debts_filtered['Obs_value'])
+# Ajouter des étiquettes et un titre
+plt.xlabel('Date')
+plt.ylabel('Obs_value')
+plt.title('Scatter Plot - Date vs Obs_value')
+# Afficher le plot
+plt.show()
+
+#downloading a dataset of number of firms created
+data_firms_creation = get_series('001564319')
+selected_columns = ['DATE', 'OBS_VALUE']
+data_firms_creation = data_firms_creation.loc[:, selected_columns]
+print(data_firms_creation.head())
+data_firms_creation.to_csv('datas/' + 'firms_creation_filtered.csv', index=False)
+
+
+ 
