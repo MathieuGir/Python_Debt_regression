@@ -60,6 +60,8 @@ policy_rates_df['Date'] = (
     policy_rates_df['Year'].astype(str)
 )
 print(policy_rates_df)
+field_float = ['Deposit facility', 'Fixed rate', 'Minimum bid rate', 'Marginal lending facility']
+policy_rates_df[field_float] = policy_rates_df[field_float].astype(float)
 
 policy_rates_df.drop('Year', axis=1, inplace=True)
 policy_rates_df.to_csv('datas/' + 'policy_rates.csv', index=False)
