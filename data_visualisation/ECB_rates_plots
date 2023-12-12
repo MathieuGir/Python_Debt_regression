@@ -1,0 +1,21 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Read the data from the CSV file
+policy_rates_df = pd.read_csv('datas/policy_rates.csv')
+plt.figsize(15, 10)
+
+# Tracer les différents taux sur le même graphique avec différentes couleurs
+plt.scatter(policy_rates_df['Date'], policy_rates_df['Deposit facility'], label='Deposit facility', color='blue')
+#plt.plot(policy_rates_df['Date'], policy_rates_df['Fixed rate'], label='Fixed rate', color='green')
+#plt.plot(policy_rates_df['Date'], policy_rates_df['Marginal lending facility'], label='Marginal lending facility', color='orange')
+
+plt.legend()
+
+plt.title('Policy Rates Over Time')
+plt.xlabel('Date')
+plt.ylabel('Rate')
+#plt.ylim(-0.5, 4.5)
+
+plt.show()
