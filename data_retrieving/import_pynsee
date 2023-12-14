@@ -3,6 +3,7 @@
 #pip install matplotlib
 import pandas as pd
 import matplotlib.pyplot as plt
+import re 
 
 from pynsee.utils.init_conn import init_conn
 init_conn(insee_key='GvulBMLLd4u26RRdMPxYlvqjvHYa', insee_secret='MvDm1OBD_s1a4A33InvrYRT_wEga')
@@ -11,33 +12,59 @@ from pynsee.macrodata import *
 from pynsee.macrodata.get_series_list import get_series_list
 from pynsee.macrodata.get_series import get_series
 
+# Fonction pour nettoyer le nom du DataFrame
+def clean_filename(name):
+    return re.sub(r'[^a-zA-Z0-9]', '_', str(name))
 
-#downloading a dataset of general government debt 
-data_general_gov_debts = get_series('010596752')
-# Sélectionner uniquement les colonnes "Date" et "Obs_value"
-selected_columns = ['DATE', 'OBS_VALUE']
-data_general_gov_debts_filtered = data_general_gov_debts.loc[:, selected_columns]
-# Afficher les premières lignes du DataFrame filtré
-print(data_general_gov_debts_filtered.head())
-# Enregistrer le DataFrame filtré dans un fichier CSV
-data_general_gov_debts_filtered.to_csv('datas/' + 'APU_debts_filtered.csv', index=False)
-# Convertir la colonne 'Date' en format de date si elle n'est pas déjà au bon format
-data_general_gov_debts_filtered['Date'] = pd.to_datetime(data_general_gov_debts_filtered['Date'])
-# Créer le scatter plot
-plt.scatter(data_general_gov_debts_filtered['Date'], data_general_gov_debts_filtered['Obs_value'])
-# Ajouter des étiquettes et un titre
-plt.xlabel('Date')
-plt.ylabel('Obs_value')
-plt.title('Scatter Plot - Date vs Obs_value')
-# Afficher le plot
-plt.show()
+def import_and_save_data(id_bank, dataframe_name):
+    # Télécharger les données
+    data = get_series(id_bank)
+    
+    # Sélectionner uniquement les colonnes "DATE" et "OBS_VALUE"
+    data_filtered = data.loc[:, ['DATE', 'OBS_VALUE']]
+    
+    # Afficher les premières lignes du DataFrame filtré
+    print(data_filtered.head())
 
-#downloading a dataset of number of firms created
-data_firms_creation = get_series('001564319')
-selected_columns = ['DATE', 'OBS_VALUE']
-data_firms_creation = data_firms_creation.loc[:, selected_columns]
-print(data_firms_creation.head())
-data_firms_creation.to_csv('datas/' + 'firms_creation_filtered.csv', index=False)
+    # Enregistrer le DataFrame filtré dans un fichier CSV
+    csv_filename = f'datas/{clean_filename(dataframe_name)}_filtered.csv'
+    data_filtered.to_csv(csv_filename, index=False)
 
+    # Convertir la colonne 'DATE' en format de date si elle n'est pas déjà au bon format
+    data_filtered['DATE'] = pd.to_datetime(data_filtered['DATE'])
+    
+    return data_filtered
 
- 
+def create_scatter_plot(data, plot_title, x_label, y_label):
+    # Créer le scatter plot
+    plt.scatter(data['DATE'], data['OBS_VALUE'])
+    
+    # Ajouter des étiquettes et un titre
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.title(plot_title)
+    
+    # Afficher le plot
+    plt.show()
+
+# Utilisation des fonctions pour chaque jeu de données
+
+# General government debt
+data_general_gov_debts = import_and_save_data('010596752', 'APU_debts')
+create_scatter_plot(data_general_gov_debts, 'Evolution de la dette des administrations publiques', 'Date', 'Dette des administrations publiques')
+
+# Number of firms created
+data_firms_creation = import_and_save_data('001564319', 'firms_creation')
+create_scatter_plot(data_firms_creation, 'Evolution du nombre de firmes créées', 'Date', 'Nombre de firmes créées')
+
+# Unemployment rate evolution
+data_unemployment_rate = import_and_save_data('001515842', 'unemployment_rate')
+create_scatter_plot(data_unemployment_rate, 'Evolution du taux de chômage', 'Date', 'Taux de chômage')
+
+# Balance of payments evolution (credit)
+data_BOP = import_and_save_data('001694057', 'BOP')
+create_scatter_plot(data_BOP, 'Evolution de la balance des paiements', 'Date', 'Balance des paiements - Crédits - transactions courantes')
+
+# Natality rate evolution
+data_natality_rate = import_and_save_data('000436392', 'natality_rate')
+create_scatter_plot(data_natality_rate, 'Evolution du taux de natalité', 'Date', 'Taux de natalité (naissances pour 1000 habitants) - France métropolitaine')
