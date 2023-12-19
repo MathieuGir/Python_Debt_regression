@@ -11,6 +11,7 @@ rate_colors = {'Deposit facility': 'navy', 'Marginal lending facility': 'green'}
 for column in rate_colors:
     ax.scatter(policy_rates_df['Date'], policy_rates_df[column], label=column, color=rate_colors[column], marker='+', s=25)
 
+ax.setylim(-0.75, 6)
 ax.set_yticks(np.arange(-0.75, 6, 0.25))
 ax.set_title('Policy Rates Over Time')
 ax.set_xlabel('Date')
@@ -27,5 +28,5 @@ plt.grid(linestyle=':', alpha=0.5)
 ax.axhline(y=0, color='darkred', linestyle='--', linewidth=1.25, label='Zero Lower Bound') # Add the Zero Lower Bound 
 ax.legend()
 
-plt.savefig('data_visualisation/policy_rates_plot.png')
+#plt.savefig('data_visualisation/policy_rates_plot.png')
 plt.show()
