@@ -27,6 +27,9 @@ def import_and_save_data(id_bank, dataframe_name):
     # Sélectionner uniquement les colonnes "DATE" et "OBS_VALUE"
     data_filtered = data.loc[:, ['DATE', 'OBS_VALUE']]
     
+    # Convertir la colonne 'DATE' en format de date
+    data_filtered['DATE'] = pd.to_datetime(data_filtered['DATE'])
+    
     # Renommer la colonne 'OBS_VALUE' avec le nom du DataFrame
     new_column_name = clean_filename(dataframe_name)
     data_filtered = data_filtered.rename(columns={'OBS_VALUE': new_column_name})
@@ -37,65 +40,28 @@ def import_and_save_data(id_bank, dataframe_name):
     # Enregistrer le DataFrame filtré dans un fichier CSV
     csv_filename = f'datas/{clean_filename(dataframe_name)}_filtered.csv'
     data_filtered.to_csv(csv_filename, index=False)
-
-    # Convertir la colonne 'DATE' en format de date si elle n'est pas déjà au bon format
-    data_filtered['DATE'] = pd.to_datetime(data_filtered['DATE'])
     
     return data_filtered
 
-def create_scatter_plot(data, plot_title, x_label, y_label):
-    # Créer le scatter plot
-    plt.scatter(data['DATE'], data[y_label], label='Données réelles')
-    
-    # Ajouter des étiquettes et un titre
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
-    plt.title(plot_title)
-    
-    # Ajuster une ligne de régression polynomiale (dans cet exemple, degré 1 pour une droite)
-    days_since_start = (data['DATE'] - data['DATE'].min()).dt.days.values
-    coefficients = np.polyfit(days_since_start, data[y_label], 3)
-    polynomial = np.poly1d(coefficients)
-    
-    # Tracer la ligne de régression
-    plt.plot(data['DATE'], polynomial(days_since_start), color='red', label='Régression linéaire')
-    
-    # Calculer le coefficient de détermination (R²)
-    slope, intercept, r_value, p_value, std_err = linregress(days_since_start, data[y_label])
-    r_squared = r_value ** 2
-    
-    # Afficher le R² sur le graphique
-    plt.text(0.95, 0.02, f'R² : {r_squared:.4f}', transform=plt.gca().transAxes, bbox=dict(facecolor='white', alpha=0.8))
-    
-    # Afficher la légende
-    plt.legend()
-    
-    # Afficher le plot
-    plt.show()
+
 
 # Utilisation des fonctions pour chaque jeu de données
 
 # General government debt
 data_general_gov_debts = import_and_save_data('010596752', 'APU_debts')
-create_scatter_plot(data_general_gov_debts, 'Evolution de la dette des administrations publiques', 'Date', 'APU_debts')
 
 # Number of firms created
 data_firms_creation = import_and_save_data('001564319', 'firms_creation')
-create_scatter_plot(data_firms_creation, 'Evolution du nombre de firmes créées', 'Date', 'firms_creation')
 
 # Unemployment rate evolution
 data_unemployment_rate = import_and_save_data('001515842', 'unemployment_rate')
-create_scatter_plot(data_unemployment_rate, 'Evolution du taux de chômage', 'Date', 'unemployment_rate')
 
 # Balance of payments evolution (credit)
 data_BOP = import_and_save_data('001694057', 'BOP')
-create_scatter_plot(data_BOP, 'Evolution de la balance des paiements', 'Date', 'BOP')
 
 # Natality rate evolution
 data_natality_rate = import_and_save_data('000436392', 'natality_rate')
-create_scatter_plot(data_natality_rate, 'Evolution du taux de natalité', 'Date', 'natality_rate')
 
 #firms failure 
 data_business_insolvencies = import_and_save_data('001656164', 'business_insolvencies')
-create_scatter_plot(data_business_insolvencies, 'Evolution du nombre de défaillances de firmes par date de jugement en France tout secteur confondu', 'Date', 'business_insolvencies')
 

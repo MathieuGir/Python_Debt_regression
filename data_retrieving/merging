@@ -1,0 +1,75 @@
+#Download Pypi package 
+#pip install pynsee[full]
+#pip install seaborn
+#pip install scipy
+import pandas as pd
+import matplotlib.pyplot as plt
+import re 
+import seaborn as sns
+import numpy as np
+from scipy.stats import linregress
+import os
+
+from pynsee.utils.init_conn import init_conn
+init_conn(insee_key='GvulBMLLd4u26RRdMPxYlvqjvHYa', insee_secret='MvDm1OBD_s1a4A33InvrYRT_wEga')
+
+from pynsee.macrodata import * 
+from pynsee.macrodata.get_series_list import get_series_list
+from pynsee.macrodata.get_series import get_series
+
+
+# Chemin vers le dossier contenant les fichiers CSV
+data_folder = 'datas/'
+
+# Chargement des fichiers CSV depuis le dossier "datas"
+apu_debts = pd.read_csv(data_folder + 'APU_debts_filtered.csv')
+bop = pd.read_csv(data_folder + 'BOP_filtered.csv')
+business_insolvencies = pd.read_csv(data_folder + 'business_insolvencies_filtered.csv')
+firms_creation = pd.read_csv(data_folder + 'firms_creation_filtered.csv')
+natality_rate = pd.read_csv(data_folder + 'natality_rate_filtered.csv')
+unemployment_rate = pd.read_csv(data_folder + 'unemployment_rate_filtered.csv')
+
+# Convertir la colonne 'DATE' en type datetime
+apu_debts['DATE'] = pd.to_datetime(apu_debts['DATE'])
+bop['DATE'] = pd.to_datetime(bop['DATE'])
+business_insolvencies['DATE'] = pd.to_datetime(business_insolvencies['DATE'])
+firms_creation['DATE'] = pd.to_datetime(firms_creation['DATE'])
+natality_rate['DATE'] = pd.to_datetime(natality_rate['DATE'])
+unemployment_rate['DATE'] = pd.to_datetime(unemployment_rate['DATE'])
+
+# Filtrer les données mensuelles pour conserver seulement janvier, avril et octobre
+apu_debts = apu_debts[apu_debts['DATE'].dt.month.isin([1, 4, 10])]
+bop = bop[bop['DATE'].dt.month.isin([1, 4, 10])]
+business_insolvencies = business_insolvencies[business_insolvencies['DATE'].dt.month.isin([1, 4, 10])]
+firms_creation = firms_creation[firms_creation['DATE'].dt.month.isin([1, 4, 10])]
+natality_rate = natality_rate[natality_rate['DATE'].dt.month.isin([1, 4, 10])]
+unemployment_rate = unemployment_rate[unemployment_rate['DATE'].dt.month.isin([1, 4, 10])]
+
+# Filtrer les données pour ne conserver que celles après le 1er janvier 2008
+apu_debts = apu_debts[apu_debts['DATE'] >= '2008-01-01']
+bop = bop[bop['DATE'] >= '2008-01-01']
+business_insolvencies = business_insolvencies[business_insolvencies['DATE'] >= '2008-01-01']
+firms_creation = firms_creation[firms_creation['DATE'] >= '2008-01-01']
+natality_rate = natality_rate[natality_rate['DATE'] >= '2008-01-01']
+unemployment_rate = unemployment_rate[unemployment_rate['DATE'] >= '2008-01-01']
+
+# Fusionner les bases de données sur la colonne 'DATE'
+consolidated_data = apu_debts
+consolidated_data = pd.merge(consolidated_data, bop, on='DATE', how='outer')
+consolidated_data = pd.merge(consolidated_data, business_insolvencies, on='DATE', how='outer')
+consolidated_data = pd.merge(consolidated_data, firms_creation, on='DATE', how='outer')
+consolidated_data = pd.merge(consolidated_data, natality_rate, on='DATE', how='outer')
+consolidated_data = pd.merge(consolidated_data, unemployment_rate, on='DATE', how='outer')
+
+# Remplir les données manquantes avec 0
+consolidated_data = consolidated_data.fillna(0)
+
+# Réinitialiser l'index pour avoir 'DATE' comme colonne
+consolidated_data = consolidated_data.reset_index(drop=True)
+
+# Afficher les premières lignes de la base de données consolidée
+print(consolidated_data.head())
+
+# Enregistrement de la base de données consolidée dans le dossier "datas"
+consolidated_filename = os.path.join(data_folder, 'consolidated_data.csv')
+consolidated_data.to_csv(consolidated_filename, index=False)

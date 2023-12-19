@@ -1,0 +1,79 @@
+#Download Pypi package 
+#pip install pynsee[full]
+#pip install seaborn
+#pip install scipy
+import pandas as pd
+import matplotlib.pyplot as plt
+import re 
+import seaborn as sns
+import numpy as np
+from scipy.stats import linregress
+
+from pynsee.utils.init_conn import init_conn
+init_conn(insee_key='GvulBMLLd4u26RRdMPxYlvqjvHYa', insee_secret='MvDm1OBD_s1a4A33InvrYRT_wEga')
+
+from pynsee.macrodata import * 
+from pynsee.macrodata.get_series_list import get_series_list
+from pynsee.macrodata.get_series import get_series
+
+
+import os
+import pandas as pd
+
+# Chemin vers le dossier contenant les fichiers CSV
+data_folder = 'datas/'
+
+# Chargement des fichiers CSV depuis le dossier "datas"
+apu_debts = pd.read_csv(os.path.join(data_folder, 'APU_debts_filtered.csv'))
+bop = pd.read_csv(os.path.join(data_folder, 'BOP_filtered.csv'))
+business_insolvencies = pd.read_csv(os.path.join(data_folder, 'business_insolvencies_filtered.csv'))
+firms_creation = pd.read_csv(os.path.join(data_folder, 'firms_creation_filtered.csv'))
+natality_rate = pd.read_csv(os.path.join(data_folder, 'natality_rate_filtered.csv'))
+unemployment_rate = pd.read_csv(os.path.join(data_folder, 'unemployment_rate_filtered.csv'))
+
+def create_scatter_plot(data, plot_title, x_label, y_label):
+    # Convertir la colonne 'DATE' en format de date
+    data['DATE'] = pd.to_datetime(data['DATE'], errors='coerce')
+    
+    # Supprimer les lignes avec des valeurs manquantes dans la colonne 'DATE'
+    data = data.dropna(subset=['DATE'])
+    
+    # Créer le scatter plot
+    plt.scatter(data['DATE'], data[y_label], label='Données réelles')
+    
+    # Créer le scatter plot
+    plt.scatter(data['DATE'], data[y_label], label='Données réelles')
+    
+    # Ajouter des étiquettes et un titre
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.title(plot_title)
+    
+    # Ajuster une ligne de régression polynomiale (dans cet exemple, degré 1 pour une droite)
+    days_since_start = (data['DATE'] - data['DATE'].min()).dt.days.values
+    coefficients = np.polyfit(days_since_start, data[y_label], 3)
+    polynomial = np.poly1d(coefficients)
+    
+    # Tracer la ligne de régression
+    plt.plot(data['DATE'], polynomial(days_since_start), color='red', label='Régression linéaire')
+    
+    # Calculer le coefficient de détermination (R²)
+    slope, intercept, r_value, p_value, std_err = linregress(days_since_start, data[y_label])
+    r_squared = r_value ** 2
+    
+    # Afficher le R² sur le graphique
+    plt.text(0.95, 0.02, f'R² : {r_squared:.4f}', transform=plt.gca().transAxes, bbox=dict(facecolor='white', alpha=0.8))
+    
+    # Afficher la légende
+    plt.legend()
+    
+    # Afficher le plot
+    plt.show()
+
+
+create_scatter_plot(apu_debts, 'Evolution de la dette des administrations publiques', 'Date', 'APU_debts')
+create_scatter_plot(firms_creation, 'Evolution du nombre de firmes créées', 'Date', 'firms_creation')
+create_scatter_plot(unemployment_rate, 'Evolution du taux de chômage', 'Date', 'unemployment_rate')
+create_scatter_plot(bop, 'Evolution de la balance des paiements', 'Date', 'BOP')
+create_scatter_plot(natality_rate, 'Evolution du taux de natalité', 'Date', 'natality_rate')
+create_scatter_plot(business_insolvencies, 'Evolution du nombre de défaillances de firmes par date de jugement en France tout secteur confondu', 'Date', 'business_insolvencies')
