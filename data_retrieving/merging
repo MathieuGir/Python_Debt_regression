@@ -10,58 +10,39 @@ import numpy as np
 from scipy.stats import linregress
 import os
 
-from pynsee.utils.init_conn import init_conn
-init_conn(insee_key='GvulBMLLd4u26RRdMPxYlvqjvHYa', insee_secret='MvDm1OBD_s1a4A33InvrYRT_wEga')
-
-from pynsee.macrodata import * 
-from pynsee.macrodata.get_series_list import get_series_list
-from pynsee.macrodata.get_series import get_series
-
 
 # Chemin vers le dossier contenant les fichiers CSV
 data_folder = 'datas/'
 
 # Chargement des fichiers CSV depuis le dossier "datas"
+
 negotiable_debts = pd.read_csv(data_folder + 'negotiable_debts_filtered.csv')
-bop = pd.read_csv(data_folder + 'BOP_filtered.csv')
-business_insolvencies = pd.read_csv(data_folder + 'business_insolvencies_mensual.csv')
-firms_creation = pd.read_csv(data_folder + 'firms_creation_mensual.csv')
-natality_rate = pd.read_csv(data_folder + 'natality_rate_filtered.csv')
-unemployment_rate = pd.read_csv(data_folder + 'unemployment_rate_mensual.csv')
+consolidated_data = negotiable_debts[negotiable_debts['DATE'] >= '2008-01-01']
+consolidated_data['DATE'] = pd.to_datetime(consolidated_data['DATE'])
 
-# Convertir la colonne 'DATE' en type datetime
-negotiable_debts['DATE'] = pd.to_datetime(negotiable_debts['DATE'])
-bop['DATE'] = pd.to_datetime(bop['DATE'])
-business_insolvencies['DATE'] = pd.to_datetime(business_insolvencies['DATE'])
-firms_creation['DATE'] = pd.to_datetime(firms_creation['DATE'])
-natality_rate['DATE'] = pd.to_datetime(natality_rate['DATE'])
-unemployment_rate['DATE'] = pd.to_datetime(unemployment_rate['DATE'])
 
-# Filtrer les données pour ne conserver que celles après le 1er janvier 2008
-negotiable_debts = negotiable_debts[negotiable_debts['DATE'] >= '2008-01-01']
-bop = bop[bop['DATE'] >= '2008-01-01']
-business_insolvencies = business_insolvencies[business_insolvencies['DATE'] >= '2008-01-01']
-firms_creation = firms_creation[firms_creation['DATE'] >= '2008-01-01']
-natality_rate = natality_rate[natality_rate['DATE'] >= '2008-01-01']
-unemployment_rate = unemployment_rate[unemployment_rate['DATE'] >= '2008-01-01']
+datas_to_merge = ['BOP_filtered', 
+                'negotiable_debts_filtered',
+                'business_insolvencies_mensual',
+                'firms_creation_mensual', 
+                'natality_rate_filtered',
+                'unemployment_rate_mensual',
+                'CAC_40',
+                'EUR_USD'
+                ]
 
-# Fusionner les bases de données sur la colonne 'DATE'
-consolidated_data = negotiable_debts
-consolidated_data = pd.merge(consolidated_data, bop, on='DATE', how='outer')
-consolidated_data = pd.merge(consolidated_data, business_insolvencies, on='DATE', how='outer')
-consolidated_data = pd.merge(consolidated_data, firms_creation, on='DATE', how='outer')
-consolidated_data = pd.merge(consolidated_data, natality_rate, on='DATE', how='outer')
-consolidated_data = pd.merge(consolidated_data, unemployment_rate, on='DATE', how='outer')
+for data in datas_to_merge:
+    df = pd.read_csv(data_folder + data + '.csv')
+    df['DATE'] = pd.to_datetime(df['DATE'])
+    df = df[df['DATE'] >= '2008-01-01']
+    df = df.sort_values('DATE')
+    print(data, '\n', df.head())
+    consolidated_data = pd.merge(consolidated_data, df, on='DATE', how='outer')
 
-# Remplir les données manquantes avec 0
-consolidated_data = consolidated_data.fillna(0)
+consolidated_data = consolidated_data.reset_index(drop=True).sort_values('DATE')
 
-# Réinitialiser l'index pour avoir 'DATE' comme colonne
-consolidated_data = consolidated_data.reset_index(drop=True)
-
-# Afficher les premières lignes de la base de données consolidée
 print(consolidated_data.head())
 
-# Enregistrement de la base de données consolidée dans le dossier "datas"
 consolidated_filename = os.path.join(data_folder, 'consolidated_data.csv')
 consolidated_data.to_csv(consolidated_filename, index=False)
+
