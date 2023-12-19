@@ -48,7 +48,7 @@ def import_and_save_data(id_bank, dataframe_name):
 # Utilisation des fonctions pour chaque jeu de données
 
 # General government debt
-data_general_gov_debts = import_and_save_data('010596752', 'APU_debts')
+governement_negotiable_debts = import_and_save_data('001711531', 'negotiable_debts')
 
 # Number of firms created
 data_firms_creation = import_and_save_data('001564319', 'firms_creation')

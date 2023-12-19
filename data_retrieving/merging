@@ -22,31 +22,23 @@ from pynsee.macrodata.get_series import get_series
 data_folder = 'datas/'
 
 # Chargement des fichiers CSV depuis le dossier "datas"
-apu_debts = pd.read_csv(data_folder + 'APU_debts_filtered.csv')
+negotiable_debts = pd.read_csv(data_folder + 'negotiable_debts_filtered.csv')
 bop = pd.read_csv(data_folder + 'BOP_filtered.csv')
-business_insolvencies = pd.read_csv(data_folder + 'business_insolvencies_filtered.csv')
-firms_creation = pd.read_csv(data_folder + 'firms_creation_filtered.csv')
+business_insolvencies = pd.read_csv(data_folder + 'business_insolvencies_mensual.csv')
+firms_creation = pd.read_csv(data_folder + 'firms_creation_mensual.csv')
 natality_rate = pd.read_csv(data_folder + 'natality_rate_filtered.csv')
-unemployment_rate = pd.read_csv(data_folder + 'unemployment_rate_filtered.csv')
+unemployment_rate = pd.read_csv(data_folder + 'unemployment_rate_mensual.csv')
 
 # Convertir la colonne 'DATE' en type datetime
-apu_debts['DATE'] = pd.to_datetime(apu_debts['DATE'])
+negotiable_debts['DATE'] = pd.to_datetime(negotiable_debts['DATE'])
 bop['DATE'] = pd.to_datetime(bop['DATE'])
 business_insolvencies['DATE'] = pd.to_datetime(business_insolvencies['DATE'])
 firms_creation['DATE'] = pd.to_datetime(firms_creation['DATE'])
 natality_rate['DATE'] = pd.to_datetime(natality_rate['DATE'])
 unemployment_rate['DATE'] = pd.to_datetime(unemployment_rate['DATE'])
 
-# Filtrer les données mensuelles pour conserver seulement janvier, avril et octobre
-apu_debts = apu_debts[apu_debts['DATE'].dt.month.isin([1, 4, 10])]
-bop = bop[bop['DATE'].dt.month.isin([1, 4, 10])]
-business_insolvencies = business_insolvencies[business_insolvencies['DATE'].dt.month.isin([1, 4, 10])]
-firms_creation = firms_creation[firms_creation['DATE'].dt.month.isin([1, 4, 10])]
-natality_rate = natality_rate[natality_rate['DATE'].dt.month.isin([1, 4, 10])]
-unemployment_rate = unemployment_rate[unemployment_rate['DATE'].dt.month.isin([1, 4, 10])]
-
 # Filtrer les données pour ne conserver que celles après le 1er janvier 2008
-apu_debts = apu_debts[apu_debts['DATE'] >= '2008-01-01']
+negotiable_debts = negotiable_debts[negotiable_debts['DATE'] >= '2008-01-01']
 bop = bop[bop['DATE'] >= '2008-01-01']
 business_insolvencies = business_insolvencies[business_insolvencies['DATE'] >= '2008-01-01']
 firms_creation = firms_creation[firms_creation['DATE'] >= '2008-01-01']
@@ -54,7 +46,7 @@ natality_rate = natality_rate[natality_rate['DATE'] >= '2008-01-01']
 unemployment_rate = unemployment_rate[unemployment_rate['DATE'] >= '2008-01-01']
 
 # Fusionner les bases de données sur la colonne 'DATE'
-consolidated_data = apu_debts
+consolidated_data = negotiable_debts
 consolidated_data = pd.merge(consolidated_data, bop, on='DATE', how='outer')
 consolidated_data = pd.merge(consolidated_data, business_insolvencies, on='DATE', how='outer')
 consolidated_data = pd.merge(consolidated_data, firms_creation, on='DATE', how='outer')

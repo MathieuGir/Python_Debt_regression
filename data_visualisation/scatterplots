@@ -18,13 +18,13 @@ from pynsee.macrodata.get_series import get_series
 
 
 import os
-import pandas as pd
+
 
 # Chemin vers le dossier contenant les fichiers CSV
 data_folder = 'datas/'
 
 # Chargement des fichiers CSV depuis le dossier "datas"
-apu_debts = pd.read_csv(os.path.join(data_folder, 'APU_debts_filtered.csv'))
+negotiable_debts = pd.read_csv(os.path.join(data_folder + 'negotiable_debts_filtered.csv'))
 bop = pd.read_csv(os.path.join(data_folder, 'BOP_filtered.csv'))
 business_insolvencies = pd.read_csv(os.path.join(data_folder, 'business_insolvencies_filtered.csv'))
 firms_creation = pd.read_csv(os.path.join(data_folder, 'firms_creation_filtered.csv'))
@@ -71,7 +71,7 @@ def create_scatter_plot(data, plot_title, x_label, y_label):
     plt.show()
 
 
-create_scatter_plot(apu_debts, 'Evolution de la dette des administrations publiques', 'Date', 'APU_debts')
+create_scatter_plot(negotiable_debts, 'Evolution de la dette négociable de l Etat', 'Date', 'negotiable_debts')
 create_scatter_plot(firms_creation, 'Evolution du nombre de firmes créées', 'Date', 'firms_creation')
 create_scatter_plot(unemployment_rate, 'Evolution du taux de chômage', 'Date', 'unemployment_rate')
 create_scatter_plot(bop, 'Evolution de la balance des paiements', 'Date', 'BOP')

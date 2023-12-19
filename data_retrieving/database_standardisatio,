@@ -1,0 +1,86 @@
+#Download Pypi package 
+#pip install pynsee[full]
+#pip install matplotlib
+#pip install seaborn
+#pip install scipy
+import pandas as pd
+import matplotlib.pyplot as plt
+import re 
+import seaborn as sns
+import numpy as np
+from scipy.stats import linregress
+import os
+
+from pynsee.utils.init_conn import init_conn
+init_conn(insee_key='GvulBMLLd4u26RRdMPxYlvqjvHYa', insee_secret='MvDm1OBD_s1a4A33InvrYRT_wEga')
+
+from pynsee.macrodata import * 
+from pynsee.macrodata.get_series_list import get_series_list
+from pynsee.macrodata.get_series import get_series
+
+
+
+# Chemin vers le dossier contenant les fichiers CSV
+data_folder = 'datas/'
+
+# Chargement des fichiers CSV depuis le dossier "datas"
+business_insolvencies = pd.read_csv(data_folder + 'business_insolvencies_filtered.csv')
+firms_creation = pd.read_csv(data_folder + 'firms_creation_filtered.csv')
+unemployment_rate = pd.read_csv(data_folder + 'unemployment_rate_filtered.csv')
+
+
+
+def clean_filename(name):
+    return re.sub(r'[^a-zA-Z0-9]', '_', str(name))
+
+def fill_missing_months_linear(data, column_name, output_folder='datas/'):
+    # Convertir la colonne 'DATE' en type datetime
+    data['DATE'] = pd.to_datetime(data['DATE'])
+    
+    # Définir 'DATE' comme index
+    data.set_index('DATE', inplace=True)
+    
+    # Rééchantillonner à la fréquence mensuelle
+    data_resampled = data.resample('MS').mean()
+    
+    # Ajouter des lignes pour les mois manquants
+    data_resampled = data_resampled.asfreq('MS')
+    
+    # Interpoler les valeurs manquantes avec une interpolation linéaire
+    data_resampled = data_resampled.interpolate(method='linear')
+    
+    # Enregistrer le DataFrame dans un fichier CSV
+    csv_filename = f'{output_folder}/{clean_filename(column_name)}_mensual.csv'
+    data_resampled.to_csv(csv_filename, index=True)
+    
+    return data_resampled
+
+def fill_missing_months_divided(data, column_name, output_folder='datas/'):
+    # Convertir la colonne 'DATE' en type datetime
+    data['DATE'] = pd.to_datetime(data['DATE'])
+    
+    # Définir 'DATE' comme index
+    data.set_index('DATE', inplace=True)
+    
+    # Rééchantillonner à la fréquence mensuelle
+    data_resampled = data.resample('MS').mean()
+    
+    # Ajouter des lignes pour les mois manquants
+    data_resampled = data_resampled.asfreq('MS')
+    
+    # Diviser les valeurs par 3
+    data_resampled = data_resampled / 3
+    
+    # Remplacer les valeurs manquantes par la valeur du mois précédent (divisée par 3)
+    data_resampled = data_resampled.fillna(method='ffill')
+    
+    # Enregistrer le DataFrame dans un fichier CSV
+    csv_filename = f'{output_folder}/{clean_filename(column_name)}_mensual.csv'
+    data_resampled.to_csv(csv_filename, index=True)
+    
+    return data_resampled
+
+# Exemple d'utilisation
+filled_divided_business_insolvencies = fill_missing_months_divided(business_insolvencies, 'business_insolvencies')
+filled_divided_firms_creation = fill_missing_months_divided(firms_creation, 'firms_creation')
+filled_linear_unemployment_rate = fill_missing_months_linear(unemployment_rate, 'unemployment_rate')
