@@ -19,7 +19,7 @@ consolidated_data['DATE'] = pd.to_datetime(consolidated_data['DATE'])
 datas_to_merge = ['BOP_filtered', 
                 'negotiable_debts_filtered',
                 'business_insolvencies_mensual',
-                'firms_creation_mensual', 
+                'firms_creation_filtered', 
                 'natality_rate_filtered',
                 'unemployment_rate_mensual',
                 'CAC_40',
