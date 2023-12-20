@@ -3,29 +3,27 @@ import os
 
 destination_folder = "datas"
 files = {
-    'C:\\Users\\mathi\\Downloads\\CAC 40 - Données Historiques.csv': 'CAC_40.csv',
+    'C:\\Users\\mathi\\Downloads\\CAC 40 Historical Data (2).csv': 'CAC_40.csv',
     'C:\\Users\\mathi\\Downloads\\EUR_USD Historical Data (3).csv': 'EUR_USD.csv'
 }
 
 for file_path, new_name in files.items():
     df = pd.read_csv(file_path, encoding='utf-8')
     df.rename(columns={'Date': 'DATE'}, inplace=True)
-    
-    if new_name == 'CAC_40.csv':
-        df['DATE'] = pd.to_datetime(df['DATE'], format='%d/%m/%Y', errors='coerce')
-    elif new_name == 'EUR_USD.csv':
-        df['DATE'] = pd.to_datetime(df['DATE'], format='%m/%d/%Y', errors='coerce')
-
+    df['DATE'] = pd.to_datetime(df['DATE'], format='%m/%d/%Y', errors='coerce')
     df['DATE'] = df['DATE'].dt.strftime('%Y-%m-%d')
+    print("date successful")
 
     if new_name == 'CAC_40.csv':    
-        df = df[['DATE', 'Dernier']]
-        df.rename(columns={'Dernier': 'Valuation'}, inplace=True)
+        df = df[['DATE', 'Price']]
+        df.rename(columns={'Price': 'Valuation'}, inplace=True)
+        print(new_name, df.head())
         df['Valuation'] = df['Valuation'].str.replace('.', '').str.replace(',', '.').str.replace('"', '').astype(float)
     
     elif new_name == 'EUR_USD.csv':
         df = df[['DATE', 'Price']]
         df.rename(columns={'Price': 'Exch_rate'}, inplace=True)
+        print(new_name, df.head())
         df['Exch_rate'] = df['Exch_rate'].replace({',': '.', '"': ''}, regex=True).astype(float)
 
     new_path = os.path.join(destination_folder, new_name)
