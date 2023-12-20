@@ -29,7 +29,7 @@ datas_to_merge = ['BOP_filtered',
 for data in datas_to_merge:
     df = pd.read_csv(data_folder + data + '.csv')
     df['DATE'] = pd.to_datetime(df['DATE'])
-    df = df[df['DATE'] >= '2008-01-01']
+    df = df[df['DATE'] >= '2009-01-01']
     df = df.sort_values('DATE')
     print(data, '\n', df.head())
     consolidated_data = pd.merge(consolidated_data, df, on='DATE', how='outer')
