@@ -82,5 +82,4 @@ def fill_missing_months_divided(data, column_name, output_folder='datas/'):
 
 # Exemple d'utilisation
 filled_divided_business_insolvencies = fill_missing_months_divided(business_insolvencies, 'business_insolvencies')
-filled_divided_firms_creation = fill_missing_months_divided(firms_creation, 'firms_creation')
 filled_linear_unemployment_rate = fill_missing_months_linear(unemployment_rate, 'unemployment_rate')
