@@ -4,14 +4,16 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
+#pip install ruptures
+import numpy as np
+import statsmodels.api as sm
 import matplotlib.pyplot as plt
-
+import ruptures as rpt
 # Chemin vers le dossier contenant les fichiers CSV
 data_folder = 'datas/'
 
 # Chargement des fichiers CSV depuis le dossier "datas"
-final_data = pd.read_csv(os.path.join(data_folder + 'final_data.csv'))
-
+final_data = pd.read_csv(os.path.join(data_folder, 'final_data.csv'), parse_dates=['DATE'])
 
 # Sélectionner les colonnes pour la régression
 selected_columns = ['BOP', 'business_insolvencies', 'firms_creation', 'natality_rate', 'unemployment_rate', 'Valuation', 'Exch_rate', 'negotiable_debts']
@@ -26,14 +28,17 @@ data_for_regression = data_for_regression.dropna()
 X = data_for_regression.drop(columns=['negotiable_debts'])
 Y = data_for_regression['negotiable_debts']
 
+# Ajouter une constante pour l'intercept dans X
+X = sm.add_constant(X)
+
 # Diviser les données en ensembles d'entraînement et de test
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
 
-# Initialiser le modèle de régression linéaire
-model = LinearRegression()
+# Initialiser le modèle de régression linéaire avec statsmodels
+model = sm.OLS(Y_train, X_train).fit()
 
-# Entraîner le modèle sur l'ensemble d'entraînement
-model.fit(X_train, Y_train)
+# Imprimer un résumé des statistiques du modèle
+print(model.summary())
 
 # Faire des prédictions sur l'ensemble de test
 predictions = model.predict(X_test)
@@ -42,13 +47,65 @@ predictions = model.predict(X_test)
 mse = mean_squared_error(Y_test, predictions)
 r2 = r2_score(Y_test, predictions)
 
-print(f'Mean Squared Error: {mse}')
+print(f'\nMean Squared Error: {mse}')
 print(f'R^2 Score: {r2}')
 
-# Afficher les coefficients du modèle
-coefficients = pd.DataFrame({'Variable': X.columns, 'Coefficient': model.coef_})
-print('Coefficients:')
-print(coefficients)
+# Combinez X et Y en une seule matrice
+matrix = pd.concat([Y, X], axis=1).to_numpy()
 
-# Afficher l'intercept du modèle
-print('Intercept:', model.intercept_)
+# Détection de changement avec ruptures pour chaque coefficient
+breakpoints = []
+for i in range(X.shape[1]):
+    algo = rpt.Pelt(model="rbf").fit(matrix[:, [0, i + 1]])
+    result = algo.predict(pen=10)  # Vous pouvez ajuster le paramètre de pénalité
+    breakpoints.append(result)
+
+# Convertissez les indices des points de rupture en un seul ensemble
+breakpoints = np.unique(np.concatenate(breakpoints))
+
+# Affichez les points de rupture
+print("Points de rupture détectés :", breakpoints)
+
+# Réinitialiser l'index du dataframe
+final_data = final_data.reset_index(drop=True)
+
+# Points de rupture détectés
+breakpoints = [0, 40, 85, 135, len(final_data) - 1]
+
+# Extraire les dates correspondantes aux points de rupture
+breakpoint_dates = final_data.loc[breakpoints, 'DATE']
+
+# Ajustez les dates pour le premier et le dernier segment
+breakpoint_dates.iloc[0] = pd.to_datetime('2009-01-01')
+breakpoint_dates.iloc[-1] = pd.to_datetime('2023-04-01')
+
+# Divisez le dataframe en segments basés sur les dates de rupture
+# Divisez le dataframe en segments basés sur les dates de rupture
+segments = []
+for i in range(len(breakpoints) - 1):
+    start_date = pd.to_datetime(breakpoint_dates.iloc[i])
+    end_date = pd.to_datetime(breakpoint_dates.iloc[i + 1])
+    segment_data = final_data[(final_data['DATE'] >= start_date) & (final_data['DATE'] < end_date)]
+    segments.append(segment_data)
+
+
+# Ajustez une régression linéaire pour chaque segment avec statsmodels
+for i, segment_data in enumerate(segments):
+    start_date = pd.to_datetime(breakpoint_dates.iloc[i])
+    end_date = pd.to_datetime(breakpoint_dates.iloc[i + 1])
+
+    X = segment_data.drop(columns=['negotiable_debts', 'DATE'])
+    Y = segment_data['negotiable_debts']
+
+    # Ajoutez une constante à X pour estimer l'ordonnée à l'origine
+    X = sm.add_constant(X)
+
+    # Créez un modèle de régression linéaire avec statsmodels
+    model = sm.OLS(Y, X)
+
+    # Ajustez le modèle
+    results = model.fit()
+
+    # Affichez les résultats sous forme de tableau
+    print(f"\nSegment {i + 1} - Period: {start_date} to {end_date}")
+    print(results.summary())
