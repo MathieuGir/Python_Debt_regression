@@ -5,19 +5,15 @@
 import pandas as pd
 import os
 
-
 # Chemin vers le dossier contenant les fichiers CSV
 data_folder = 'datas/'
 
 # Chargement des fichiers CSV depuis le dossier "datas"
-
 negotiable_debts = pd.read_csv(data_folder + 'negotiable_debts_filtered.csv')
 consolidated_data = negotiable_debts[negotiable_debts['DATE'] >= '2008-01-01']
 consolidated_data['DATE'] = pd.to_datetime(consolidated_data['DATE'])
 
-
-datas_to_merge = ['BOP_filtered', 
-                'negotiable_debts_filtered',
+datas_to_merge = ['BOP_filtered',
                 'business_insolvencies_mensual',
                 'firms_creation_filtered', 
                 'natality_rate_filtered',
@@ -36,8 +32,10 @@ for data in datas_to_merge:
 
 consolidated_data = consolidated_data.reset_index(drop=True).sort_values('DATE')
 
-print(consolidated_data.head())
+# Filtrage des données pour inclure uniquement celles antérieures ou égales au 1er avril 2023
+final_data = consolidated_data[consolidated_data['DATE'] <= '2023-04-01']
 
-consolidated_filename = os.path.join(data_folder, 'consolidated_data.csv')
-consolidated_data.to_csv(consolidated_filename, index=False)
+print(final_data.head())
 
+final_filename = os.path.join(data_folder, 'final_data.csv')
+final_data.to_csv(final_filename, index=False)
