@@ -97,7 +97,6 @@ for index, row in policy_rates_monthly.iterrows():
     
     policy_rates_monthly.loc[index, policy_rates.columns] = policy_rates.values[0]
 
-
 policy_rates_monthly = policy_rates_monthly.rename(columns={'Date': 'DATE'})
 
 policy_rates_monthly.to_csv('datas/policy_rates_monthly.csv', index=False)
