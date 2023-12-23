@@ -5,33 +5,26 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 #pip install ruptures
+#pip install statmodels
 import numpy as np
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
 import ruptures as rpt
-# Chemin vers le dossier contenant les fichiers CSV
+
 data_folder = 'datas/'
 
-# Chargement des fichiers CSV depuis le dossier "datas"
 final_data = pd.read_csv(os.path.join(data_folder, 'final_data.csv'), parse_dates=['DATE'])
 
-# Sélectionner les colonnes pour la régression
-selected_columns = ['BOP', 'business_insolvencies', 'firms_creation', 'natality_rate', 'unemployment_rate', 'Valuation', 'Exch_rate', 'negotiable_debts']
-
-# Créer un DataFrame avec les colonnes sélectionnées
+selected_columns = ['BOP', 'business_insolvencies', 'firms_creation', 'natality_rate', 'unemployment_rate', 'Valuation', 'Exch_rate', 'negotiable_debts', 'Fixed rate']
 data_for_regression = final_data[selected_columns]
 
-# Supprimer les lignes avec des valeurs manquantes
 data_for_regression = data_for_regression.dropna()
 
-# Séparer les variables indépendantes (X) et dépendantes (Y)
 X = data_for_regression.drop(columns=['negotiable_debts'])
 Y = data_for_regression['negotiable_debts']
-
-# Ajouter une constante pour l'intercept dans X
 X = sm.add_constant(X)
+print(X.head())
 
-# Diviser les données en ensembles d'entraînement et de test
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
 
 # Initialiser le modèle de régression linéaire avec statsmodels
@@ -50,7 +43,6 @@ r2 = r2_score(Y_test, predictions)
 print(f'\nMean Squared Error: {mse}')
 print(f'R^2 Score: {r2}')
 
-# Combinez X et Y en une seule matrice
 matrix = pd.concat([Y, X], axis=1).to_numpy()
 
 # Détection de changement avec ruptures pour chaque coefficient
