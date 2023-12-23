@@ -3,11 +3,6 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
-<<<<<<< HEAD
-=======
-#pip install ruptures
-#pip install statmodels
->>>>>>> 8467e376c1d39279a7b56ebf883418145a472fb3
 import numpy as np
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
@@ -17,22 +12,15 @@ data_folder = 'datas/'
 
 final_data = pd.read_csv(os.path.join(data_folder, 'final_data.csv'), parse_dates=['DATE'])
 
-<<<<<<< HEAD
 # Ajouter les colonnes à retirer à la liste selected_columns
 selected_columns = ['BOP', 'business_insolvencies', 'firms_creation', 'natality_rate', 'unemployment_rate', 'Valuation', 'Exch_rate', 'Fixed rate', 'negotiable_debts']
 
 # Sélectionner les colonnes nécessaires
-=======
-selected_columns = ['BOP', 'business_insolvencies', 'firms_creation', 'natality_rate', 'unemployment_rate', 'Valuation', 'Exch_rate', 'negotiable_debts', 'Fixed rate']
->>>>>>> 8467e376c1d39279a7b56ebf883418145a472fb3
 data_for_regression = final_data[selected_columns]
 
 data_for_regression = data_for_regression.dropna()
 
-<<<<<<< HEAD
 # Retirer les colonnes spécifiées de X
-=======
->>>>>>> 8467e376c1d39279a7b56ebf883418145a472fb3
 X = data_for_regression.drop(columns=['negotiable_debts'])
 Y = data_for_regression['negotiable_debts']
 X = sm.add_constant(X)
@@ -95,9 +83,8 @@ for i in range(len(breakpoints) - 1):
 
 
 # Ajustez une régression linéaire pour chaque segment avec statsmodels
+# Ajustez une régression linéaire pour chaque segment avec statsmodels
 for i, segment_data in enumerate(segments):
-    print(f"\nSegment {i + 1} - Descriptive Statistics:")
-    print(segment_data.describe())
     start_date = pd.to_datetime(breakpoint_dates.iloc[i])
     end_date = pd.to_datetime(breakpoint_dates.iloc[i + 1])
 

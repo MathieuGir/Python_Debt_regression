@@ -1,0 +1,55 @@
+#pip install plotly
+import os
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+
+# Charger les données
+data_folder = 'datas/'
+final_data = pd.read_csv(os.path.join(data_folder, 'final_data.csv'), parse_dates=['DATE'])
+
+# Créer une figure avec Plotly Express
+fig = px.scatter_matrix(
+    final_data,
+    dimensions=['BOP', 'business_insolvencies', 'firms_creation', 'natality_rate', 'unemployment_rate', 'Valuation', 'Exch_rate', 'Fixed rate', 'negotiable_debts'],
+    color='negotiable_debts',
+    title='Relations entre différentes variables et la dette négociable'
+)
+
+# Mettre à jour l'apparence du graphique
+fig.update_traces(marker=dict(size=5), diagonal_visible=False)
+
+# Ajouter un graphique de dispersion 3D
+scatter_3d = go.Scatter3d(
+    x=final_data['unemployment_rate'],
+    y=final_data['Valuation'],
+    z=final_data['negotiable_debts'],
+    mode='markers',
+    marker=dict(size=5, color=final_data['negotiable_debts'], colorscale='Viridis'),
+    name='Dette négociable en fonction du taux de chômage et de la valorisation'
+)
+
+fig.add_trace(scatter_3d)
+
+# Mettre à jour l'apparence du graphique
+fig.update_traces(marker=dict(size=5))
+
+
+# Mettre à jour le layout pour ajuster l'angle des étiquettes sur l'axe y
+fig.update_layout(
+    title_font=dict(family='Arial', size=20, color='black'),  # Police, taille et couleur du titre
+    font=dict(family='Arial', size=10, color='black'),  # Police, taille et couleur du texte
+    scene=dict(
+        yaxis=dict(
+            title_font=dict(family='Arial', size=15, color='black'),  # Police, taille, couleur de l'axe y
+            tickmode='array',
+            tickvals=list(range(len(final_data.columns))),
+            ticktext=list(final_data.columns),
+            categoryorder='array',
+            categoryarray=list(final_data.columns)
+        ),
+    )
+)
+
+# Afficher le tableau de bord interactif
+fig.show()
