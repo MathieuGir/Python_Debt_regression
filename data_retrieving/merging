@@ -19,7 +19,8 @@ datas_to_merge = ['BOP_filtered',
                 'natality_rate_filtered',
                 'unemployment_rate_mensual',
                 'CAC_40',
-                'EUR_USD'
+                'EUR_USD',
+                'policy_rates_monthly'
                 ]
 
 for data in datas_to_merge:

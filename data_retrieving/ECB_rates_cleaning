@@ -70,9 +70,34 @@ for col in field_float:
 
 policy_rates_df[field_float] = policy_rates_df[field_float].astype(float)
 
-print(policy_rates_df.head())  
-
 policy_rates_df.dtypes
 
 policy_rates_df.drop('Year', axis=1, inplace=True)
+print(policy_rates_df.head())  
+
 policy_rates_df.to_csv('datas/' + 'policy_rates.csv', index=False)
+
+
+print(policy_rates_df.head())
+
+policy_rates_df['Date'] = pd.to_datetime(policy_rates_df['Date'], format='%Y-%m-%d', errors='coerce')
+print(policy_rates_df.head())
+
+numeric_cols = policy_rates_df.select_dtypes(include='number').columns
+policy_rates_df[numeric_cols] = policy_rates_df[numeric_cols].ffill()
+
+date_range = pd.date_range(start=min(policy_rates_df['Date']), end=max(policy_rates_df['Date']), freq='MS')
+policy_rates_monthly = pd.DataFrame({'Date': date_range})
+
+
+for index, row in policy_rates_monthly.iterrows():
+    closest_date = policy_rates_df['Date'].iloc[(policy_rates_df['Date'] - row['Date']).abs().argsort()[:1]].values[0]
+    
+    policy_rates = policy_rates_df[policy_rates_df['Date'] == closest_date].drop('Date', axis=1)
+    
+    policy_rates_monthly.loc[index, policy_rates.columns] = policy_rates.values[0]
+
+
+policy_rates_monthly = policy_rates_monthly.rename(columns={'Date': 'DATE'})
+
+policy_rates_monthly.to_csv('datas/policy_rates_monthly.csv', index=False)
