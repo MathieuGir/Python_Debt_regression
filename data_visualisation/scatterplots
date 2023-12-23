@@ -8,6 +8,7 @@ import re
 import seaborn as sns
 import numpy as np
 from scipy.stats import linregress
+import matplotlib.font_manager as fm
 
 from pynsee.utils.init_conn import init_conn
 init_conn(insee_key='GvulBMLLd4u26RRdMPxYlvqjvHYa', insee_secret='MvDm1OBD_s1a4A33InvrYRT_wEga')
@@ -31,27 +32,30 @@ firms_creation = pd.read_csv(os.path.join(data_folder, 'firms_creation_filtered.
 natality_rate = pd.read_csv(os.path.join(data_folder, 'natality_rate_filtered.csv'))
 unemployment_rate = pd.read_csv(os.path.join(data_folder, 'unemployment_rate_filtered.csv'))
 
-def create_scatter_plot(data, plot_title, x_label, y_label):
+def create_scatter_plot(data, plot_title, x_label, y_label, output_filename):
     # Convertir la colonne 'DATE' en format de date
     data['DATE'] = pd.to_datetime(data['DATE'], errors='coerce')
     
     # Supprimer les lignes avec des valeurs manquantes dans la colonne 'DATE'
     data = data.dropna(subset=['DATE'])
     
-    # Créer le scatter plot
-    plt.scatter(data['DATE'], data[y_label], label='Données réelles')
+    # Utiliser une palette de couleurs pastelles
+    sns.set_palette("pastel")
+    
+    # Utiliser une police spécifique (par exemple, "Arial")
+    prop = fm.FontProperties(fname=fm.findfont(fm.FontProperties(family='Arial')))
     
     # Créer le scatter plot
     plt.scatter(data['DATE'], data[y_label], label='Données réelles')
     
-    # Ajouter des étiquettes et un titre
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
-    plt.title(plot_title)
+    # Ajouter des étiquettes et un titre avec la nouvelle police
+    plt.xlabel(x_label, fontproperties=prop)
+    plt.ylabel(y_label, fontproperties=prop)
+    plt.title(plot_title, fontproperties=prop)
     
     # Ajuster une ligne de régression polynomiale (dans cet exemple, degré 1 pour une droite)
     days_since_start = (data['DATE'] - data['DATE'].min()).dt.days.values
-    coefficients = np.polyfit(days_since_start, data[y_label], 3)
+    coefficients = np.polyfit(days_since_start, data[y_label], 17)
     polynomial = np.poly1d(coefficients)
     
     # Tracer la ligne de régression
@@ -61,19 +65,22 @@ def create_scatter_plot(data, plot_title, x_label, y_label):
     slope, intercept, r_value, p_value, std_err = linregress(days_since_start, data[y_label])
     r_squared = r_value ** 2
     
-    # Afficher le R² sur le graphique
-    plt.text(0.95, 0.02, f'R² : {r_squared:.4f}', transform=plt.gca().transAxes, bbox=dict(facecolor='white', alpha=0.8))
+    # Afficher le R² sur le graphique avec la nouvelle police
+    plt.text(0.95, 0.02, f'R² : {r_squared:.4f}', transform=plt.gca().transAxes, bbox=dict(facecolor='white', alpha=0.8), fontproperties=prop)
     
-    # Afficher la légende
-    plt.legend()
+    # Afficher la légende avec la nouvelle police
+    plt.legend(prop=prop)
+    
+    # Enregistrer le plot en tant que fichier PNG dans le dossier "data_visualization"
+    plt.savefig(os.path.join('data_visualisation', output_filename), bbox_inches='tight')
     
     # Afficher le plot
     plt.show()
 
-
-create_scatter_plot(negotiable_debts, 'Evolution de la dette négociable de l Etat', 'Date', 'negotiable_debts')
-create_scatter_plot(firms_creation, 'Evolution du nombre de firmes créées', 'Date', 'firms_creation')
-create_scatter_plot(unemployment_rate, 'Evolution du taux de chômage', 'Date', 'unemployment_rate')
-create_scatter_plot(bop, 'Evolution de la balance des paiements', 'Date', 'BOP')
-create_scatter_plot(natality_rate, 'Evolution du taux de natalité', 'Date', 'natality_rate')
-create_scatter_plot(business_insolvencies, 'Evolution du nombre de défaillances de firmes par date de jugement en France tout secteur confondu', 'Date', 'business_insolvencies')
+# Utilisation de la fonction avec spécification des noms de fichiers de sortie
+create_scatter_plot(negotiable_debts, 'Evolution de la dette négociable de l Etat', 'Date', 'negotiable_debts', 'negotiable_debts_scatter.png')
+create_scatter_plot(firms_creation, 'Evolution du nombre de firmes créées', 'Date', 'firms_creation', 'firms_creation_scatter.png')
+create_scatter_plot(unemployment_rate, 'Evolution du taux de chômage', 'Date', 'unemployment_rate', 'unemployment_rate_scatter.png')
+create_scatter_plot(bop, 'Evolution de la balance des paiements', 'Date', 'BOP', 'BOP_scatter.png')
+create_scatter_plot(natality_rate, 'Evolution du taux de natalité', 'Date', 'natality_rate', 'natality_rate_scatter.png')
+create_scatter_plot(business_insolvencies, 'Evolution du nombre de défaillances de firmes par date de jugement en France tout secteur confondu', 'Date', 'business_insolvencies', 'business_insolvencies_scatter.png')
