@@ -1,0 +1,70 @@
+import os 
+import pandas as pd
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor
+from sklearn.metrics import mean_squared_error
+
+data_folder = 'datas/'
+
+# Charger le DataFrame à partir du fichier CSV
+final_data = pd.read_csv(os.path.join(data_folder, 'final_data.csv'), parse_dates=['DATE'])
+
+# Ajouter les colonnes à retirer à la liste selected_columns
+selected_columns = ['BOP', 'business_insolvencies', 'firms_creation', 'natality_rate', 'unemployment_rate', 'Valuation', 'Exch_rate', 'Fixed rate', 'negotiable_debts']
+
+# Garder uniquement les colonnes spécifiées dans selected_columns
+df = final_data[selected_columns]
+
+# Séparation des données en features (X) et target (y)
+X = df.drop('negotiable_debts', axis=1)
+y = df['negotiable_debts']
+
+# Séparation des données en ensemble d'entraînement et ensemble de test
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Modèles à évaluer
+models = {
+    'Régression Linéaire': LinearRegression(),
+    'Arbre de Décision': DecisionTreeRegressor(),
+    'Forêt Aléatoire': RandomForestRegressor(),
+    'AdaBoost': AdaBoostRegressor()
+}
+
+# Évaluation des modèles avec la validation croisée
+for model_name, model in models.items():
+    scores = cross_val_score(model, X_train, y_train, cv=5, scoring='neg_mean_squared_error')
+    rmse_scores = pd.Series(-scores, name="RMSE").apply(lambda x: round(x ** 0.5, 2))
+    print(f"Modèle: {model_name}")
+    print("RMSE scores:", rmse_scores)
+    print(f"Moyenne RMSE: {rmse_scores.mean()}\n")
+
+
+# Modèle AdaBoost
+adaboost_model = AdaBoostRegressor()
+adaboost_model.fit(X_train, y_train)
+
+# Prédictions sur l'ensemble de test
+y_pred = adaboost_model.predict(X_test)
+
+# Calcul du RMSE sur l'ensemble de test
+rmse_test = mean_squared_error(y_test, y_pred, squared=False)
+
+# Évaluation du modèle avec la validation croisée
+scores = cross_val_score(adaboost_model, X_train, y_train, cv=5, scoring='neg_mean_squared_error')
+rmse_scores = pd.Series(-scores, name="RMSE").apply(lambda x: round(x ** 0.5, 2))
+average_rmse = rmse_scores.mean()
+
+# Affichage des résultats
+print("Résultats du modèle AdaBoost :")
+print(f"RMSE sur l'ensemble de test : {rmse_test:.2f}")
+print("RMSE moyenne avec validation croisée :")
+print(rmse_scores)
+print(f"Moyenne RMSE : {average_rmse:.2f}")
+# Prédictions sur l'ensemble de test
+y_pred = adaboost_model.predict(X_test)
+
+# Affichage des prédictions
+print("Prédictions du modèle AdaBoost :")
+print(y_pred)

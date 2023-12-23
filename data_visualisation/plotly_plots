@@ -1,8 +1,13 @@
 #pip install plotly
 import os
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly.express as px
+import dash
+from dash import dcc
+from dash import html
+from dash.dependencies import Input, Output
 
 # Charger les données
 data_folder = 'datas/'
@@ -53,3 +58,59 @@ fig.update_layout(
 
 # Afficher le tableau de bord interactif
 fig.show()
+
+
+
+# Initialisation de l'application Dash
+app = dash.Dash(__name__)
+
+# Mise en page de l'application
+app.layout = html.Div([
+    html.H1("Tableau de Bord de la Dette Négociable"),
+
+    # Filtre temporel
+    dcc.RangeSlider(
+        id='date-slider',
+        marks={i: str(date) for i, date in enumerate(final_data['DATE'])},
+        min=0,
+        max=len(final_data) - 1,
+        value=[0, len(final_data) - 1],
+        step=1
+    ),
+
+    # Graphique principal
+    dcc.Graph(id='main-graph'),
+
+    # Graphique comparatif
+    dcc.Graph(id='comparison-graph')
+])
+
+# Définition des callbacks pour la mise à jour des graphiques
+@app.callback(
+    [Output('main-graph', 'figure'),
+     Output('comparison-graph', 'figure')],
+    [Input('date-slider', 'value')]
+)
+def update_graph(selected_dates):
+    # Extraction des données pour les dates sélectionnées
+    selected_data = final_data.iloc[selected_dates[0]:selected_dates[1] + 1]
+
+    # Graphique principal (à adapter selon vos besoins)
+    main_fig = make_subplots(rows=2, cols=1, shared_xaxes=True)
+    main_fig.add_trace(go.Scatter(x=selected_data['DATE'], y=selected_data['negotiable_debts'], mode='lines', name='Dette Négociable'), row=1, col=1)
+    main_fig.add_trace(go.Scatter(x=selected_data['DATE'], y=selected_data['unemployment_rate'], mode='lines', name='Taux de Chômage'), row=2, col=1)
+    main_fig.update_layout(title='Données Sélectionnées')
+
+    # Graphique de comparaison
+    comparison_fig = go.Figure()
+    for i in range(0, len(selected_dates), 2):
+        segment_data = final_data.iloc[selected_dates[i]:selected_dates[i + 1] + 1]
+        comparison_fig.add_trace(go.Scatter(x=segment_data['DATE'], y=segment_data['negotiable_debts'], mode='lines', name=f'Segment {i//2 + 1}'))
+
+    comparison_fig.update_layout(title='Comparaison des Segments Temporels')
+
+    return main_fig, comparison_fig
+
+# Exécution de l'application
+if __name__ == '__main__':
+    app.run_server(debug=True)

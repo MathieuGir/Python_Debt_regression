@@ -9,6 +9,7 @@ import seaborn as sns
 import numpy as np
 from scipy.stats import linregress
 import matplotlib.font_manager as fm
+from statsmodels.tsa.seasonal import seasonal_decompose
 
 from pynsee.utils.init_conn import init_conn
 init_conn(insee_key='GvulBMLLd4u26RRdMPxYlvqjvHYa', insee_secret='MvDm1OBD_s1a4A33InvrYRT_wEga')
@@ -84,3 +85,48 @@ create_scatter_plot(unemployment_rate, 'Evolution du taux de chômage', 'Date', 
 create_scatter_plot(bop, 'Evolution de la balance des paiements', 'Date', 'BOP', 'BOP_scatter.png')
 create_scatter_plot(natality_rate, 'Evolution du taux de natalité', 'Date', 'natality_rate', 'natality_rate_scatter.png')
 create_scatter_plot(business_insolvencies, 'Evolution du nombre de défaillances de firmes par date de jugement en France tout secteur confondu', 'Date', 'business_insolvencies', 'business_insolvencies_scatter.png')
+
+
+# Charger vos données
+final_data = pd.read_csv(os.path.join(data_folder, 'final_data.csv'), parse_dates=['DATE'])
+
+# Garder uniquement les colonnes spécifiées dans selected_columns
+selected_columns = ['DATE','BOP', 'business_insolvencies', 'firms_creation', 'natality_rate', 'unemployment_rate', 'Valuation', 'Exch_rate', 'Fixed rate', 'negotiable_debts']
+df = final_data[selected_columns]
+
+# Séparation des données en features (X) et target (y)
+X = df.drop('negotiable_debts', axis=1)
+y = df['negotiable_debts']
+
+# Assurez-vous que la colonne 'DATE' est de type datetime
+df['DATE'] = pd.to_datetime(df['DATE'])
+
+# Définissez la colonne 'DATE' comme index
+df.set_index('DATE', inplace=True)
+# Création d'un DataFrame avec la date comme index
+df_date = df.set_index('DATE')
+
+# Analyse de séries chronologiques
+result = seasonal_decompose(df_date['negotiable_debts'], model='additive', period=12)  # Assumption: Seasonal pattern repeats every 12 months
+
+# Visualisation des composants (tendance, saisonnalité, résidus)
+plt.figure(figsize=(12, 8))
+
+plt.subplot(4, 1, 1)
+plt.plot(result.trend, label='Tendance')
+plt.legend()
+
+plt.subplot(4, 1, 2)
+plt.plot(result.seasonal, label='Saisonnalité')
+plt.legend()
+
+plt.subplot(4, 1, 3)
+plt.plot(result.resid, label='Résidus')
+plt.legend()
+
+plt.subplot(4, 1, 4)
+plt.plot(df_date['negotiable_debts'], label='Dette négociable')
+plt.legend()
+
+plt.tight_layout()
+plt.show()
