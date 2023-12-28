@@ -87,24 +87,22 @@ create_scatter_plot(natality_rate, 'Evolution du taux de natalité', 'Date', 'na
 create_scatter_plot(business_insolvencies, 'Evolution du nombre de défaillances de firmes par date de jugement en France tout secteur confondu', 'Date', 'business_insolvencies', 'business_insolvencies_scatter.png')
 
 
-# Charger vos données
+#Charger les données
+data_folder = 'datas/'
 final_data = pd.read_csv(os.path.join(data_folder, 'final_data.csv'), parse_dates=['DATE'])
 
 # Garder uniquement les colonnes spécifiées dans selected_columns
-selected_columns = ['DATE','BOP', 'business_insolvencies', 'firms_creation', 'natality_rate', 'unemployment_rate', 'Valuation', 'Exch_rate', 'Fixed rate', 'negotiable_debts']
+selected_columns = ['DATE', 'BOP', 'business_insolvencies', 'firms_creation', 'natality_rate', 'unemployment_rate', 'Valuation', 'Exch_rate', 'Fixed rate', 'negotiable_debts']
 df = final_data[selected_columns]
-
-# Séparation des données en features (X) et target (y)
-X = df.drop('negotiable_debts', axis=1)
-y = df['negotiable_debts']
 
 # Assurez-vous que la colonne 'DATE' est de type datetime
 df['DATE'] = pd.to_datetime(df['DATE'])
 
 # Définissez la colonne 'DATE' comme index
 df.set_index('DATE', inplace=True)
+
 # Création d'un DataFrame avec la date comme index
-df_date = df.set_index('DATE')
+df_date = df.copy()  # Copie le DataFrame pour éviter la modification du DataFrame d'origine
 
 # Analyse de séries chronologiques
 result = seasonal_decompose(df_date['negotiable_debts'], model='additive', period=12)  # Assumption: Seasonal pattern repeats every 12 months
