@@ -19,7 +19,6 @@ url_ecb = "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/key_ecb_int
 request_text = request.urlopen(url_ecb).read()
 page = bs4.BeautifulSoup(request_text, "lxml")
 
-print(page.find("table"))
 policy_rates_df = page.find('table')
 print(policy_rates_df)
 

@@ -47,21 +47,9 @@ def import_and_save_data(id_bank, dataframe_name):
 
 # Utilisation des fonctions pour chaque jeu de données
 
-# General government debt
 governement_negotiable_debts = import_and_save_data('001711531', 'negotiable_debts')
-
-# Number of firms created
 data_firms_creation = import_and_save_data('010755537', 'firms_creation')
-
-# Unemployment rate evolution
 data_unemployment_rate = import_and_save_data('001515842', 'unemployment_rate')
-
-# Balance of payments evolution (credit)
 data_BOP = import_and_save_data('001694057', 'BOP')
-
-# Natality rate evolution
 data_natality_rate = import_and_save_data('000436392', 'natality_rate')
-
-#firms failure 
 data_business_insolvencies = import_and_save_data('001656164', 'business_insolvencies')
-
