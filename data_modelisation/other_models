@@ -90,8 +90,12 @@ for model_name, metrics_dict in metrics_scores.items():
     total_mse = np.sum(metrics_dict['MSE'])
     print(f'Somme des MSE pour {model_name}: {total_mse}')
    
-# Enregistrer le DataFrame final_data dans un fichier CSV
-final_data.to_csv('datas_with_predictions.csv', index_label='Date')
+# Enregistrer le DataFrame final_data dans un fichier CSV dans le dossier 'data_modelisation'
+output_folder = 'data_modelisation'
+output_filename = 'datas_with_predictions.csv'
+output_path = os.path.join(output_folder, output_filename)
 
+final_data.to_csv(output_path, index_label='Date')
 
+print(f"Le fichier {output_filename} a été enregistré dans le dossier {output_folder}.")
 

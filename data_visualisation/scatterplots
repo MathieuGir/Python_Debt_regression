@@ -10,16 +10,14 @@ import numpy as np
 from scipy.stats import linregress
 import matplotlib.font_manager as fm
 from statsmodels.tsa.seasonal import seasonal_decompose
+import os
 
 from pynsee.utils.init_conn import init_conn
 init_conn(insee_key='GvulBMLLd4u26RRdMPxYlvqjvHYa', insee_secret='MvDm1OBD_s1a4A33InvrYRT_wEga')
-
 from pynsee.macrodata import * 
 from pynsee.macrodata.get_series_list import get_series_list
 from pynsee.macrodata.get_series import get_series
 
-
-import os
 
 
 # Chemin vers le dossier contenant les fichiers CSV
@@ -43,7 +41,7 @@ def create_scatter_plot(data, plot_title, x_label, y_label, output_filename):
     # Utiliser une palette de couleurs pastelles
     sns.set_palette("pastel")
     
-    # Utiliser une police spécifique (par exemple, "Arial")
+    # Utiliser une police spécifique 
     prop = fm.FontProperties(fname=fm.findfont(fm.FontProperties(family='Arial')))
     
     # Créer le scatter plot
@@ -54,7 +52,7 @@ def create_scatter_plot(data, plot_title, x_label, y_label, output_filename):
     plt.ylabel(y_label, fontproperties=prop)
     plt.title(plot_title, fontproperties=prop)
     
-    # Ajuster une ligne de régression polynomiale (dans cet exemple, degré 1 pour une droite)
+    # Ajuster une ligne de régression polynomiale 
     days_since_start = (data['DATE'] - data['DATE'].min()).dt.days.values
     coefficients = np.polyfit(days_since_start, data[y_label], 17)
     polynomial = np.poly1d(coefficients)
@@ -72,7 +70,7 @@ def create_scatter_plot(data, plot_title, x_label, y_label, output_filename):
     # Afficher la légende avec la nouvelle police
     plt.legend(prop=prop)
     
-    # Enregistrer le plot en tant que fichier PNG dans le dossier "data_visualization"
+    # Enregistrer le plot en tant que fichier PNG dans le dossier "data_visualisation"
     plt.savefig(os.path.join('data_visualisation', output_filename), bbox_inches='tight')
     
     # Afficher le plot
@@ -85,6 +83,7 @@ create_scatter_plot(unemployment_rate, 'Evolution du taux de chômage', 'Date', 
 create_scatter_plot(bop, 'Evolution de la balance des paiements', 'Date', 'BOP', 'BOP_scatter.png')
 create_scatter_plot(natality_rate, 'Evolution du taux de natalité', 'Date', 'natality_rate', 'natality_rate_scatter.png')
 create_scatter_plot(business_insolvencies, 'Evolution du nombre de défaillances de firmes par date de jugement en France tout secteur confondu', 'Date', 'business_insolvencies', 'business_insolvencies_scatter.png')
+
 
 
 #Charger les données
@@ -107,7 +106,7 @@ df_date = df.copy()  # Copie le DataFrame pour éviter la modification du DataFr
 # Analyse de séries chronologiques
 result = seasonal_decompose(df_date['negotiable_debts'], model='additive', period=12)  # Assumption: Seasonal pattern repeats every 12 months
 
-# Visualisation des composants (tendance, saisonnalité, résidus)
+# Visualisation des composants (tendance, saisonnalité, résidus et évolution)
 plt.figure(figsize=(12, 8))
 
 plt.subplot(4, 1, 1)
