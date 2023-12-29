@@ -114,3 +114,11 @@ def update_graph(selected_dates):
 # Exécution de l'application
 if __name__ == '__main__':
     app.run_server(debug=True)
+
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
+
+
