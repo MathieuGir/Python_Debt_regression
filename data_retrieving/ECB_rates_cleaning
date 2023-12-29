@@ -1,7 +1,6 @@
 #Import des librairies
 import bs4
 import lxml
-import pandas
 import urllib
 import subprocess
 import re
@@ -17,7 +16,7 @@ for module in modules:
 url_ecb = "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/key_ecb_interest_rates/html/index.en.html"
 
 request_text = request.urlopen(url_ecb).read()
-page = bs4.BeautifulSoup(request_text, "lxml")
+page = bs4.BeautifulSoup(request_text, "html.parser")
 
 policy_rates_df = page.find('table')
 print(policy_rates_df)
@@ -51,51 +50,46 @@ month_map = {
     'Oct': '-10-', 'Nov': '-11-', 'Dec': '-12-'
 }
 
-# Constructing 'Date_new' column with the format DD/MM/YYYY
+# Constructing the date such that format is YYYY-MM-DD
 policy_rates_df['Date'] = (
     policy_rates_df['Year'].astype(str) + 
     extracted_date[1].map(month_map) + 
     extracted_date[0].astype(str)
 )
 
+policy_rates_df['Date'] = pd.to_datetime(policy_rates_df['Date'], format='%Y-%m-%d', errors='coerce')
 print(policy_rates_df.head())
 
-field_float = ['Deposit facility', 'Fixed rate', 'Minimum bid rate', 'Marginal lending facility']
 
-policy_rates_df.dtypes
+field_float = ['Deposit facility', 'Fixed rate', 'Minimum bid rate', 'Marginal lending facility']
 
 for col in field_float:
     policy_rates_df[col] = pd.to_numeric(policy_rates_df[col], errors='coerce')
 
 policy_rates_df[field_float] = policy_rates_df[field_float].astype(float)
 
-policy_rates_df.dtypes
 
 policy_rates_df.drop('Year', axis=1, inplace=True)
 print(policy_rates_df.head())  
 
-policy_rates_df.to_csv('datas/' + 'policy_rates.csv', index=False)
+policy_rates_df.to_csv('datas/' + 'policy_rates.csv', index=False) #saving the file as csv
 
 
-print(policy_rates_df.head())
 
 policy_rates_df['Date'] = pd.to_datetime(policy_rates_df['Date'], format='%Y-%m-%d', errors='coerce')
-print(policy_rates_df.head())
-
 numeric_cols = policy_rates_df.select_dtypes(include='number').columns
 policy_rates_df[numeric_cols] = policy_rates_df[numeric_cols].ffill()
 
+#Creation of a new dataframe with monthly data (month starts) 
 date_range = pd.date_range(start=min(policy_rates_df['Date']), end=max(policy_rates_df['Date']), freq='MS')
 policy_rates_monthly = pd.DataFrame({'Date': date_range})
 
+# Find closest date in the original df and complete the values in the monthly df
 
 for index, row in policy_rates_monthly.iterrows():
-    closest_date = policy_rates_df['Date'].iloc[(policy_rates_df['Date'] - row['Date']).abs().argsort()[:1]].values[0]
-    
+    closest_date = policy_rates_df['Date'].iloc[(policy_rates_df['Date'] - row['Date']).abs().argsort()[:1]].values[0]    
     policy_rates = policy_rates_df[policy_rates_df['Date'] == closest_date].drop('Date', axis=1)
-    
     policy_rates_monthly.loc[index, policy_rates.columns] = policy_rates.values[0]
 
-policy_rates_monthly = policy_rates_monthly.rename(columns={'Date': 'DATE'})
-
+policy_rates_monthly = policy_rates_monthly.rename(columns={'Date': 'DATE'}) 
 policy_rates_monthly.to_csv('datas/policy_rates_monthly.csv', index=False)
