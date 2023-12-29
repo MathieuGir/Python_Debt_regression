@@ -35,6 +35,8 @@ for row in rows:
     previous_value = cols[0]
     data_temp.append(cols)
 
+
+
 columns = ['Year', 'Date', 'Deposit facility', 'Fixed rate', 'Minimum bid rate', 'Marginal lending facility']
 policy_rates_df = pd.DataFrame(data_temp, columns=columns)
 print(policy_rates_df.head())
