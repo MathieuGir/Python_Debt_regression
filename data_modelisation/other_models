@@ -12,7 +12,7 @@ import numpy as np
 
 data_folder = 'datas/'
 
-# Charger le DataFrame à partir du fichier CSV
+# Charger le DataFrame 
 final_data = pd.read_csv(os.path.join(data_folder, 'final_data.csv'), parse_dates=['DATE'])
 
 # Ajouter les colonnes à retirer à la liste selected_columns
@@ -26,10 +26,10 @@ y = df['negotiable_debts']
 
 
 
-# Séparation des données en ensemble d'entraînement et ensemble de test
+# Séparation des données en  d'entraînement et ensemble de test
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Modèles à évaluer
+# Modèles choisis
 models = {
     'Régression Linéaire': LinearRegression(),
     'Arbre de Décision': DecisionTreeRegressor(),
@@ -48,7 +48,7 @@ for model_name, model in models.items():
 
 
 # Créer un dictionnaire pour stocker les métriques pour chaque modèle
-metrics_scores = {model_name: {'MSE': [], 'R2': [], 'MAE': []} for model_name in models.keys()}
+metrics_scores = {model_name: {'MSE': []} for model_name in models.keys()}
 # Créer un nouveau DataFrame pour stocker les prédictions
 predictions_df = pd.DataFrame()
 
@@ -91,7 +91,7 @@ for model_name, metrics_dict in metrics_scores.items():
     total_mse = np.sum(metrics_dict['MSE'])
     print(f'Somme des MSE pour {model_name}: {total_mse}')
    
-# Enregistrer le DataFrame final_data dans un fichier CSV dans le dossier 'data_modelisation'
+# Enregistrer le DataFrame 
 output_folder = 'data_modelisation'
 output_filename = 'datas_with_predictions.csv'
 output_path = os.path.join(output_folder, output_filename)
