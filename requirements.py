@@ -20,4 +20,5 @@ pip install fastjsonschema
 pip install --upgrade ipython
 pip install traitlets
 pip install ruptures
+pip install tqdm
 """
