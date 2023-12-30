@@ -55,13 +55,13 @@ matrix = pd.concat([Y, X], axis=1).to_numpy()
 breakpoints = []
 for i in range(X.shape[1]):
     algo = rpt.Pelt(model="rbf").fit(matrix[:, [0, i + 1]])
-    result = algo.predict(pen=10)  # Vous pouvez ajuster le paramètre de pénalité
+    result = algo.predict(pen=10)  
     breakpoints.append(result)
 
-# Convertissez les indices des points de rupture en un seul ensemble
+# Convertir les indices des points de rupture en un seul ensemble
 breakpoints = np.unique(np.concatenate(breakpoints))
 
-# Affichez les points de rupture
+# Afficher les points de rupture
 print("Points de rupture détectés :", breakpoints)
 
 # Réinitialiser l'index du dataframe
@@ -77,8 +77,8 @@ breakpoint_dates = final_data.loc[breakpoints, 'DATE']
 breakpoint_dates.iloc[0] = pd.to_datetime('2009-01-01')
 breakpoint_dates.iloc[-1] = pd.to_datetime('2023-04-01')
 
-# Divisez le dataframe en segments basés sur les dates de rupture
-# Divisez le dataframe en segments basés sur les dates de rupture
+
+# Diviser le dataframe en segments basés sur les dates de rupture
 segments = []
 for i in range(len(breakpoints) - 1):
     start_date = pd.to_datetime(breakpoint_dates.iloc[i])
@@ -87,24 +87,23 @@ for i in range(len(breakpoints) - 1):
     segments.append(segment_data)
 
 
-# Ajustez une régression linéaire pour chaque segment avec statsmodels
-# Ajustez une régression linéaire pour chaque segment avec statsmodels
+# Ajuster une régression linéaire pour chaque segment avec statsmodels
 for i, segment_data in enumerate(segments):
     start_date = pd.to_datetime(breakpoint_dates.iloc[i])
     end_date = pd.to_datetime(breakpoint_dates.iloc[i + 1])
 
-    X = segment_data.drop(columns=['negotiable_debts', 'DATE', 'Deposit facility', 'Minimum bid rate', 'Marginal lending facility'])
+    X = segment_data.drop(columns=['negotiable_debts', 'DATE', 'Deposit facility', 'Marginal lending facility'])
     Y = segment_data['negotiable_debts']
 
     # Ajoutez une constante à X pour estimer l'ordonnée à l'origine
     X = sm.add_constant(X)
 
-    # Créez un modèle de régression linéaire avec statsmodels
+    # Créer un modèle de régression linéaire avec statsmodels
     model = sm.OLS(Y, X)
 
-    # Ajustez le modèle
+    # Ajuster le modèle
     results = model.fit()
 
-    # Affichez les résultats sous forme de tableau
+    # Afficher les résultats sous forme de tableau
     print(f"\nSegment {i + 1} - Period: {start_date} to {end_date}")
     print(results.summary())
