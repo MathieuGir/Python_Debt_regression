@@ -9,6 +9,7 @@ from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 import os 
 import numpy as np
+import warnings
 
 data_folder = 'datas/'
 
@@ -58,32 +59,36 @@ features = ['BOP', 'business_insolvencies', 'firms_creation', 'natality_rate', '
 # Créer un dictionnaire pour stocker les MSE pour chaque modèle
 mse_scores = {model_name: [] for model_name in models.keys()}
 
-# Boucle sur les dates à partir de la deuxième date
-for i in tqdm(range(1, len(final_data))):
-    # Séparer les données en ensemble d'entraînement et de test
-    train_data = final_data.iloc[:i, :]
-    test_data = final_data.iloc[i, :]
+# Désactiver les avertissements pendant l'exécution de la boucle
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
 
-    # Sélectionner les caractéristiques et la cible
-    X_train = train_data[features]
-    y_train = train_data['negotiable_debts']
-    X_test = test_data[features]
+    # Boucle sur les dates à partir de la deuxième date
+    for i in tqdm(range(1, len(final_data))):
+        # Séparer les données en ensemble d'entraînement et de test
+        train_data = final_data.iloc[:i, :]
+        test_data = final_data.iloc[i, :]
 
-    # Boucle sur les modèles
-    for model_name, model in models.items():
-        # Entraîner le modèle
-        model.fit(X_train, y_train)
+        # Sélectionner les caractéristiques et la cible
+        X_train = train_data[features]
+        y_train = train_data['negotiable_debts']
+        X_test = test_data[features]
 
-        # Faire la prédiction sur les données de test
-        y_pred = model.predict(X_test.values.reshape(1, -1))
+        # Boucle sur les modèles
+        for model_name, model in models.items():
+            # Entraîner le modèle
+            model.fit(X_train, y_train)
 
-        # Ajouter les prédictions au DataFrame final_data
-        final_data.at[test_data.name, f'{model_name}_Prediction'] = y_pred[0]
+            # Faire la prédiction sur les données de test
+            y_pred = model.predict(X_test.values.reshape(1, -1))
 
-        # Calculer les métriques et les ajouter aux listes correspondantes
-        mse = mean_squared_error([test_data['negotiable_debts']], [y_pred])
+            # Ajouter les prédictions au DataFrame final_data
+            final_data.at[test_data.name, f'{model_name}_Prediction'] = y_pred[0]
 
-        metrics_scores[model_name]['MSE'].append(mse)
+            # Calculer les métriques et les ajouter aux listes correspondantes
+            mse = mean_squared_error([test_data['negotiable_debts']], [y_pred])
+
+            metrics_scores[model_name]['MSE'].append(mse)
 
 
 # Afficher les métriques pour chaque modèle
