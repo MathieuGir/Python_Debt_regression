@@ -12,4 +12,6 @@ pip install webdriver-manager
 pip install statsmodel
 pip install --upgrade setuptools
 pip install plotly
+pip install dash
+pip install --upgrade nbformat
 """

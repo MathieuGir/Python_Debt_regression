@@ -29,8 +29,7 @@ scatter_3d = go.Scatter3d(
     y=final_data['Valuation'],
     z=final_data['negotiable_debts'],
     mode='markers',
-    marker=dict(size=5, color=final_data['negotiable_debts'], colorscale='Viridis'),
-    name='Dette négociable en fonction du taux de chômage et de la valorisation'
+    marker=dict(size=5, color=final_data['negotiable_debts'], colorscale='Viridis')
 )
 
 fig.add_trace(scatter_3d)
@@ -103,8 +102,7 @@ def update_graph(selected_dates):
     return main_fig
 
 
-"""
+
 # Exécution de l'application
 if __name__ == '__main__':
     app.run_server(debug=True)
-"""
