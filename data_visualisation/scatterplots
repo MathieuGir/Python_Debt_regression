@@ -94,7 +94,6 @@ final_data = pd.read_csv(os.path.join(data_folder, 'final_data.csv'), parse_date
 selected_columns = ['DATE', 'BOP', 'business_insolvencies', 'firms_creation', 'natality_rate', 'unemployment_rate', 'Valuation', 'Exch_rate', 'Fixed rate', 'negotiable_debts']
 df = final_data[selected_columns]
 
-# Assurez-vous que la colonne 'DATE' est de type datetime
 df['DATE'] = pd.to_datetime(df['DATE'])
 
 # Définissez la colonne 'DATE' comme index
