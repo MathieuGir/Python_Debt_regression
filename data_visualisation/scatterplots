@@ -96,7 +96,7 @@ df = final_data[selected_columns]
 
 df['DATE'] = pd.to_datetime(df['DATE'])
 
-# Définissez la colonne 'DATE' comme index
+# Déf de la colonne 'DATE' comme index
 df.set_index('DATE', inplace=True)
 
 # Création d'un DataFrame avec la date comme index
