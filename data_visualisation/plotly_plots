@@ -9,11 +9,10 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 
-# Charger les données
 data_folder = 'datas/'
 final_data = pd.read_csv(os.path.join(data_folder, 'final_data.csv'), parse_dates=['DATE'])
 
-# Créer une figure avec Plotly Express
+# Création d'une figure avec Plotly Express
 fig = px.scatter_matrix(
     final_data,
     dimensions=['BOP', 'business_insolvencies', 'firms_creation', 'natality_rate', 'unemployment_rate', 'Valuation', 'Exch_rate', 'Fixed rate', 'negotiable_debts'],
@@ -24,7 +23,7 @@ fig = px.scatter_matrix(
 # Mettre à jour l'apparence du graphique
 fig.update_traces(marker=dict(size=5), diagonal_visible=False)
 
-# Ajouter un graphique de dispersion 3D
+# Ajout du graphique de dispersion 3D
 scatter_3d = go.Scatter3d(
     x=final_data['unemployment_rate'],
     y=final_data['Valuation'],
@@ -35,12 +34,10 @@ scatter_3d = go.Scatter3d(
 )
 
 fig.add_trace(scatter_3d)
-
-# Mettre à jour l'apparence du graphique
 fig.update_traces(marker=dict(size=5))
 
 
-# Mettre à jour le layout pour ajuster l'angle des étiquettes sur l'axe y
+# Mise à jour du layout pour ajuster l'angle des étiquettes sur l'axe y
 fig.update_layout(
     title_font=dict(family='Arial', size=20, color='black'),  # Police, taille et couleur du titre
     font=dict(family='Arial', size=10, color='black'),  # Police, taille et couleur du texte
@@ -56,20 +53,14 @@ fig.update_layout(
     )
 )
 
-# Afficher le tableau de bord interactif
 fig.show()
 
-
-
-
-# Initialisation de l'application Dash
 app = dash.Dash(__name__)
 
-# Mise en page de l'application
 app.layout = html.Div([
     html.H1("Tableau de Bord de la Dette Négociable"),
 
-    # Filtre temporel
+    # Filtrage temporel
     dcc.RangeSlider(
         id='date-slider',
         marks={i: str(date) for i, date in enumerate(final_data['DATE'])},
@@ -79,10 +70,9 @@ app.layout = html.Div([
         step=1
     ),
 
-    # Graphique principal
+    # Graph principal
     dcc.Graph(id='main-graph'),
-
-    # Graphique comparatif
+    # Graph comparatif
     dcc.Graph(id='comparison-graph')
 ])
 
@@ -108,12 +98,13 @@ def update_graph(selected_dates):
     main_fig.add_trace(go.Scatter(x=selected_data['DATE'], y=selected_data['Fixed rate'], mode='lines', name='Taux directeur'), row=8, col=1)
 
     main_fig.update_layout(title='Données Sélectionnées')
-
-    # Ajouter de l'espace vertical entre les sous-graphiques
     main_fig.update_layout(height=1500)
 
     return main_fig
 
+
+"""
 # Exécution de l'application
 if __name__ == '__main__':
     app.run_server(debug=True)
+"""

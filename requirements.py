@@ -11,5 +11,5 @@ pip install bs4
 pip install webdriver-manager
 pip install statsmodel
 pip install --upgrade setuptools
-
+pip install plotly
 """
