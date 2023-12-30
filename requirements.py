@@ -1,5 +1,7 @@
 """
-Note des imports à faire :
+Il est recommandé de pip install ces modules :*
+par ailleurs s'il y a erreur lors de l'import d'un module (notamment une erreur ModuleNotFound), celle-ci peut souvent être résolue par un 
+pip install module_name dans le terminal
 
 pip install pynsee [full]
 pip install matplotlib
