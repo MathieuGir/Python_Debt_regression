@@ -14,4 +14,10 @@ pip install --upgrade setuptools
 pip install plotly
 pip install dash
 pip install --upgrade nbformat
+pip install jupyter-core
+pip install jsonschema
+pip install fastjsonschema
+pip install --upgrade ipython
+pip install traitlets
+
 """
