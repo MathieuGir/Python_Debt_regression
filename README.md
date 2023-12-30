@@ -7,6 +7,6 @@ Tous les éléments utilisés sont disponibles en open-data. Ils sont issus :
 - du site de la BCE : https://www.ecb.europa.eu/stats/policy_and_exchange_rates/key_ecb_interest_rates/html/index.en.html
 - du site Investing.com (pour récupérer le taux de change €/$ et l'indice du CAC 40)
 
-
-
+Le fichier à exécuter est main.ipynb
+Il est plus que recommandé de vérifier les requirements avant de lancer ce notebook.
 
