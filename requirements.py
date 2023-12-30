@@ -9,7 +9,7 @@ pip instal numpy
 pip install -q lxml
 pip install bs4
 pip install webdriver-manager
-pip install statsmodel
+pip install statsmodels
 pip install --upgrade setuptools
 pip install plotly
 pip install dash
@@ -19,5 +19,5 @@ pip install jsonschema
 pip install fastjsonschema
 pip install --upgrade ipython
 pip install traitlets
-
+pip install ruptures
 """
