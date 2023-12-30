@@ -18,8 +18,7 @@ final_data = pd.read_csv(os.path.join(data_folder, 'final_data.csv'), parse_date
 # Ajouter les colonnes à retirer à la liste selected_columns
 selected_columns = ['BOP', 'business_insolvencies', 'firms_creation', 'natality_rate', 'unemployment_rate', 'Valuation', 'Exch_rate', 'Fixed rate', 'negotiable_debts']
 
-# Garder uniquement les colonnes spécifiées dans selected_columns
-df = final_data[selected_columns]
+
 # Sélectionner les colonnes nécessaires
 data_for_regression = final_data[selected_columns]
 

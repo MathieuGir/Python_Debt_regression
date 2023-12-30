@@ -9,26 +9,28 @@ from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 import os 
 import numpy as np
+import warnings
 
 data_folder = 'datas/'
 
-# Charger le DataFrame à partir du fichier CSV
+# Charger le DataFrame 
 final_data = pd.read_csv(os.path.join(data_folder, 'final_data.csv'), parse_dates=['DATE'])
 
 # Ajouter les colonnes à retirer à la liste selected_columns
 selected_columns = ['BOP', 'business_insolvencies', 'firms_creation', 'natality_rate', 'unemployment_rate', 'Valuation', 'Exch_rate', 'Fixed rate', 'negotiable_debts']
-
 # Garder uniquement les colonnes spécifiées dans selected_columns
 df = final_data[selected_columns]
 
 # Séparation des données en features (X) et target (y)
-X = df.drop('negotiable_debts', axis=1)
+X = df.drop(columns=['negotiable_debts'])
 y = df['negotiable_debts']
 
-# Séparation des données en ensemble d'entraînement et ensemble de test
+
+
+# Séparation des données en  d'entraînement et ensemble de test
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Modèles à évaluer
+# Modèles choisis
 models = {
     'Régression Linéaire': LinearRegression(),
     'Arbre de Décision': DecisionTreeRegressor(),
@@ -47,7 +49,7 @@ for model_name, model in models.items():
 
 
 # Créer un dictionnaire pour stocker les métriques pour chaque modèle
-metrics_scores = {model_name: {'MSE': [], 'R2': [], 'MAE': []} for model_name in models.keys()}
+metrics_scores = {model_name: {'MSE': []} for model_name in models.keys()}
 # Créer un nouveau DataFrame pour stocker les prédictions
 predictions_df = pd.DataFrame()
 
@@ -57,32 +59,36 @@ features = ['BOP', 'business_insolvencies', 'firms_creation', 'natality_rate', '
 # Créer un dictionnaire pour stocker les MSE pour chaque modèle
 mse_scores = {model_name: [] for model_name in models.keys()}
 
-# Boucle sur les dates à partir de la deuxième date
-for i in tqdm(range(1, len(final_data))):
-    # Séparer les données en ensemble d'entraînement et de test
-    train_data = final_data.iloc[:i, :]
-    test_data = final_data.iloc[i, :]
+# Désactiver les avertissements pendant l'exécution de la boucle
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
 
-    # Sélectionner les caractéristiques et la cible
-    X_train = train_data[features]
-    y_train = train_data['negotiable_debts']
-    X_test = test_data[features]
+    # Boucle sur les dates à partir de la deuxième date
+    for i in tqdm(range(1, len(final_data))):
+        # Séparer les données en ensemble d'entraînement et de test
+        train_data = final_data.iloc[:i, :]
+        test_data = final_data.iloc[i, :]
 
-    # Boucle sur les modèles
-    for model_name, model in models.items():
-        # Entraîner le modèle
-        model.fit(X_train, y_train)
+        # Sélectionner les caractéristiques et la cible
+        X_train = train_data[features]
+        y_train = train_data['negotiable_debts']
+        X_test = test_data[features]
 
-        # Faire la prédiction sur les données de test
-        y_pred = model.predict(X_test.values.reshape(1, -1))
+        # Boucle sur les modèles
+        for model_name, model in models.items():
+            # Entraîner le modèle
+            model.fit(X_train, y_train)
 
-        # Ajouter les prédictions au DataFrame final_data
-        final_data.at[test_data.name, f'{model_name}_Prediction'] = y_pred[0]
+            # Faire la prédiction sur les données de test
+            y_pred = model.predict(X_test.values.reshape(1, -1))
 
-        # Calculer les métriques et les ajouter aux listes correspondantes
-        mse = mean_squared_error([test_data['negotiable_debts']], [y_pred])
+            # Ajouter les prédictions au DataFrame final_data
+            final_data.at[test_data.name, f'{model_name}_Prediction'] = y_pred[0]
 
-        metrics_scores[model_name]['MSE'].append(mse)
+            # Calculer les métriques et les ajouter aux listes correspondantes
+            mse = mean_squared_error([test_data['negotiable_debts']], [y_pred])
+
+            metrics_scores[model_name]['MSE'].append(mse)
 
 
 # Afficher les métriques pour chaque modèle
@@ -90,7 +96,7 @@ for model_name, metrics_dict in metrics_scores.items():
     total_mse = np.sum(metrics_dict['MSE'])
     print(f'Somme des MSE pour {model_name}: {total_mse}')
    
-# Enregistrer le DataFrame final_data dans un fichier CSV dans le dossier 'data_modelisation'
+# Enregistrer le DataFrame 
 output_folder = 'data_modelisation'
 output_filename = 'datas_with_predictions.csv'
 output_path = os.path.join(output_folder, output_filename)
