@@ -76,7 +76,6 @@ breakpoint_dates = final_data.loc[breakpoints, 'DATE']
 breakpoint_dates.iloc[0] = pd.to_datetime('2009-01-01')
 breakpoint_dates.iloc[-1] = pd.to_datetime('2023-04-01')
 
-
 # Diviser le dataframe en segments basés sur les dates de rupture
 segments = []
 for i in range(len(breakpoints) - 1):
@@ -85,8 +84,7 @@ for i in range(len(breakpoints) - 1):
     segment_data = final_data[(final_data['DATE'] >= start_date) & (final_data['DATE'] < end_date)]
     segments.append(segment_data)
 
-
-# Ajuster une régression linéaire pour chaque segment avec statsmodels
+# Ajuster une régression linéaire robuste (Huber) pour chaque segment avec statsmodels
 for i, segment_data in enumerate(segments):
     start_date = pd.to_datetime(breakpoint_dates.iloc[i])
     end_date = pd.to_datetime(breakpoint_dates.iloc[i + 1])
@@ -97,12 +95,9 @@ for i, segment_data in enumerate(segments):
     # Ajoutez une constante à X pour estimer l'ordonnée à l'origine
     X = sm.add_constant(X)
 
-    # Créer un modèle de régression linéaire avec statsmodels
-    model = sm.OLS(Y, X)
-
-    # Ajuster le modèle
-    results = model.fit()
+    # Créer un modèle de régression linéaire robuste (Huber) avec statsmodels    
+    model = sm.RLM(Y, X, M=sm.robust.norms.HuberT()).fit()
 
     # Afficher les résultats sous forme de tableau
     print(f"\nSegment {i + 1} - Period: {start_date} to {end_date}")
-    print(results.summary())
+    print(model.summary())
