@@ -1,0 +1,16 @@
+pynsee
+matplotlib
+seaborn
+scipy
+numpy
+bs4
+webdriver-manager
+statsmodels
+plotly
+dash
+jupyter-core
+jsonschema
+fastjsonschema
+traitlets
+ruptures
+tqdm
